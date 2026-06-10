@@ -153,7 +153,7 @@
 
         <div class="auto-tip" id="taskTip">💡 请先在上方选择填写人</div>
         <table id="table_task">
-            <thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:20%">完成情况说明</th><th style="width:13%">负责人</th></tr></thead>
+            <thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:25%">完成说明</th><th style="width:8%">负责人</th></tr></thead>
             <tbody id="taskTbody"></tbody>
         </table>
 
@@ -259,7 +259,7 @@
         </div>
     </div>
 
-    <div class="footer-note">💡 填写流程：选择姓名 → 自动加载任务 → 勾选完成情况 → 添加小类数据 → 导出JSON发回汇总人<br>© 议题收集系统 v0.2 | 制作by 何锦仪</div>
+    <div class="footer-note">💡 填写流程：选择姓名 → 自动加载任务 → 勾选完成情况 → 添加小类数据 → 导出JSON发回汇总人<br>© 议题收集系统 v0.2 | 制作by何锦仪
 </div>
 
 <script src="meeting-data.js"></script>
@@ -428,7 +428,7 @@
         let tasks = taskLibrary[filler] || [];
         tip.innerHTML = `✅ 已加载 ${filler} 负责的 ${tasks.length} 项上周任务（W23），请确认完成情况`;
         tbody.innerHTML = '';
-        if(!tasks.length){ tip.innerHTML = `ℹ️ ${filler}：您上周没有待办项（W23），本议题可跳过`; tbody.innerHTML='<tr><td colspan="6" style="text-align:center; color:#6c86a3;">无待办任务</td></tr>'; return; }
+        if(!tasks.length){ tip.innerHTML = `ℹ️ ${filler}：您上周没有待办项（W23），本议题可跳过`; tbody.innerHTML='<tr><td colspan="6" style="text-align:center; color:#6c86a3;">无待办项</td></tr>'; return; }
         tasks.forEach(t=>{
             let row=tbody.insertRow();
             let td1=row.insertCell(0); let ta=document.createElement('textarea'); ta.rows=2; ta.style.width='100%'; ta.value=t.task; td1.appendChild(ta);
@@ -585,7 +585,7 @@
         let table = document.createElement('table');
         table.style.width = '100%';
         let thead = document.createElement('thead');
-        if(category === '已有项目评审') thead.innerHTML = '<tr><th>项目名称</th><th>阶段</th><th>进度%</th><th>本周进展</th><th>风险/问题</th><th>风险等级</th><th>人力资源分配</th></tr>';
+        if(category === '已有项目评审') thead.innerHTML = '<tr><th>项目名称</th><th>阶段</th><th>进度%</th><th>本周进展</th><th>风险/问题</th><th>风险等级</th><th>人力饱和度</th></tr>';
         else if(category === '项目完结总结') thead.innerHTML = '<tr><th>项目名称</th><th>复盘结论</th><th>资源释放情况</th><th>经验教训</th></tr>';
         else if(category === '新项目分析与立项') thead.innerHTML = '<tr><th>新项目名称</th><th>需求分析</th><th>资源需求评估</th><th>当前状态</th><th>负责人</th></tr>';
         table.appendChild(thead);
@@ -704,10 +704,21 @@
         }
     }
 
-    initWeekOptions();
-    renderAdminTables();
-    renderMeetingMinutes();
-    updatePersonSelect();
+    // ==================== 延迟初始化至数据加载完成 ====================
+    // 给 meeting-data.js 加载完成后执行
+    function initializeApp() {
+        initWeekOptions();
+        renderAdminTables();
+        renderMeetingMinutes();
+        updatePersonSelect();
+    }
+
+    // 确保在数据加载完成后执行初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+        initializeApp();
+    }
 </script>
 </body>
 </html>
