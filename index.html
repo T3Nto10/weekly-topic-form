@@ -87,15 +87,15 @@
             📌 议题一：上周任务闭环回顾 <span class="template-hint">ⓘ 点击查看模板</span>
         </div>
         <div id="template_task" class="template-content">【议题一模板】上周任务闭环回顾（逐条对齐）
-<br>1）逐项核对：按“上周任务清单”逐条确认是否已完成/进行中/未完成；
-<br>2）结果判定：对照任务目标与交付物（文档/方案/纪要/现场问题关闭等），评估是否“按时、达标”；
+<br>1）逐项核对：按"上周任务清单"逐条确认是否已完成/进行中/未完成；
+<br>2）结果判定：对照任务目标与交付物（文档/方案/纪要/现场问题关闭等），评估是否"按时、达标"；
 <br>3）差异说明：若未完成或延期，必须写清未完成原因（资源/依赖/外部条件/方案变更等）与当前卡点；
 <br>4）闭环动作：明确下一步行动、需要谁支持、预计完成时间；
 <br>5）必要时升维：对跨部门/跨项目阻塞项，标记为需会上共同协调或升级事项。</div>
 
         <div class="auto-tip" id="taskTip">💡 请先在上方选择填写人</div>
         <table id="table_task">
-            <thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:25%">未完成原因</th><th style="width:8%">负责人</th></tr></thead>
+            <thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:20%">完成情况说明</th><th style="width:10%">负责人</th></tr></thead>
             <tbody id="taskTbody"></tbody>
         </table>
 
@@ -173,7 +173,7 @@
 <br>2）背景与选项逻辑：阐明背景、约束条件、可选方案及各方案逻辑（成本/周期/风险/资源/质量等）；
 <br>3）建议方案：给出推荐方案与理由，并说明备选方案触发条件；
 <br>4）支撑材料：提供必要数据/图纸/评审结论/对齐记录等；
-<br>5）决策时点：明确“需决策时间”；若为团队内个人提出，则由该提出人直接汇报。</div>
+<br>5）决策时点：明确"需决策时间"；若为团队内个人提出，则由该提出人直接汇报。</div>
         <table id="table_decision">
             <thead><tr><th>决策事项</th><th>背景/选项逻辑</th><th>建议方案</th><th>需决策时间</th><th>提出人</th><th style="width:60px">操作</th></tr></thead>
             <tbody id="decisionTbody"><tr><td colspan="6" style="text-align:center;">点击下方按钮添加决策项</td><td style="display:none;"></td></tr></tbody>
@@ -186,7 +186,7 @@
         </div>
         <div id="template_other" class="template-content">【议题六模板】其他（补充议题收集与归类）
 <br>1）收集：讨论其他未出现在上述分类中的议题，确保信息完整（事项/说明/建议/提出人）；
-<br>2）归类：会后将“其他”中的事项按组织能效/项目/能力/机制流程等归类；
+<br>2）归类：会后将"其他"中的事项按组织能效/项目/能力/机制流程等归类；
 <br>3）纳入跟踪：形成可闭环的任务条目（抛出周次、预计完成、实际完成、状态：进行/完成/流产）；
 <br>4）升格：若同类事项数量足够或长期出现，则将其固化为新的议题点并在后续周会持续跟踪。</div>
         <table id="table_other">
@@ -201,7 +201,7 @@
         </div>
     </div>
 
-    <div class="footer-note">💡 填写流程：选择姓名 → 自动加载任务 → 勾选完成情况 → 添加小类数据 → 导出JSON发回汇总人<br>© 议题收集系统 v0.1 | 制作者：何锦仪</div>
+    <div class="footer-note">💡 填写流程：选择姓名 → 自动加载任务 → 勾选完成情况 → 添加小类数据 → 导出JSON发回汇总人<br>© 议题收集系统 v0.1 | 制作by何锦仪</div>
 </div>
 
 <script>
@@ -209,26 +209,26 @@
     // 提出周次统一为 W23，预计完成时间根据行动计划中的描述填写
     let taskLibrary = {
         "关雪丹": [
-            { task: "输出工时填报规则文档并在群内发布", proposeWeek: "W23", deadline: "下周", remark: "协同刘金山" },
-            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前", remark: "协同刘金山" }
+            { task: "输出工时填报规则文档并在群内发布", proposeWeek: "W23", deadline: "下周" },
+            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前" }
         ],
         "吴忠明": [
-            { task: "制定海目星装配段监造策略", proposeWeek: "W23", deadline: "本周", remark: "协同张海龙，远程+现场方案" }
+            { task: "制定海目星装配段监造策略", proposeWeek: "W23", deadline: "本周" }
         ],
         "张海龙": [
-            { task: "制定海目星装配段监造策略", proposeWeek: "W23", deadline: "本周", remark: "协同吴忠明，输出方案" },
-            { task: "完成大成烤箱KT打分复盘", proposeWeek: "W23", deadline: "跟进", remark: "西门子能力不足问题复盘" }
+            { task: "制定海目星装配段监造策略", proposeWeek: "W23", deadline: "本周" },
+            { task: "完成大成烤箱KT打分复盘", proposeWeek: "W23", deadline: "跟进" }
         ],
         "梁志强": [],
         "刘金山": [
-            { task: "输出工时填报规则文档并在群内发布", proposeWeek: "W23", deadline: "下周", remark: "协同关雪丹，动力侧规则对齐" },
-            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前", remark: "协同关雪丹" }
+            { task: "输出工时填报规则文档并在群内发布", proposeWeek: "W23", deadline: "下周" },
+            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前" }
         ],
         "李燏": [
-            { task: "输出CRA认证专题报告", proposeWeek: "W23", deadline: "6月底", remark: "" }
+            { task: "输出CRA认证专题报告", proposeWeek: "W23", deadline: "6月底" }
         ],
         "何锦仪": [
-            { task: "优化周会模板（增加实际完成列、周次标识、会前收集机制）", proposeWeek: "W23", deadline: "下周会前", remark: "" }
+            { task: "优化周会模板（增加实际完成列、周次标识、会前收集机制）", proposeWeek: "W23", deadline: "下周会前" }
         ]
     };
     let personList = Object.keys(taskLibrary);
@@ -286,7 +286,7 @@
             table.style.fontSize = '0.75rem';
             table.style.borderCollapse = 'collapse';
             let thead = document.createElement('thead');
-            thead.innerHTML = `<tr><th style="text-align:left">任务描述</th><th style="width:80px">提出周次</th><th style="width:80px">预计完成时间</th><th>备注</th></tr>`;
+            thead.innerHTML = `<tr><th style="text-align:left">任务描述</th><th style="width:80px">提出周次</th><th style="width:80px">预计完成时间</th></tr>`;
             table.appendChild(thead);
             let tbody = document.createElement('tbody');
             tasks.forEach(t => {
@@ -294,7 +294,6 @@
                 let td1 = row.insertCell(0); td1.innerText = t.task; td1.style.border = '1px solid #e2e8f0'; td1.style.padding = '8px';
                 let td2 = row.insertCell(1); td2.innerText = t.proposeWeek; td2.style.border = '1px solid #e2e8f0'; td2.style.padding = '8px';
                 let td3 = row.insertCell(2); td3.innerText = t.deadline; td3.style.border = '1px solid #e2e8f0'; td3.style.padding = '8px';
-                let td4 = row.insertCell(3); td4.innerText = t.remark || ''; td4.style.border = '1px solid #e2e8f0'; td4.style.padding = '8px';
             });
             table.appendChild(tbody);
             card.appendChild(table);
@@ -320,14 +319,14 @@
         let tasks = taskLibrary[filler] || [];
         tip.innerHTML = `✅ 已加载 ${filler} 负责的 ${tasks.length} 项上周任务（W23），请确认完成情况`;
         tbody.innerHTML = '';
-        if(!tasks.length){ tip.innerHTML = `ℹ️ ${filler}：您上周没有待办项（W23），本议题可跳过`; tbody.innerHTML='<tr><td colspan="6" style="text-align:center; color:#6c86a3;">您上周没有待办项</td></tr>'; return; }
+        if(!tasks.length){ tip.innerHTML = `ℹ️ ${filler}：您上周没有待办项（W23），本议题可跳过`; tbody.innerHTML='<tr><td colspan="6" style="text-align:center; color:#6c86a3;">暂无任务</td></tr>'; return; }
         tasks.forEach(t=>{
             let row=tbody.insertRow();
             let td1=row.insertCell(0); let ta=document.createElement('textarea'); ta.rows=2; ta.style.width='100%'; ta.value=t.task; td1.appendChild(ta);
             let td2=row.insertCell(1); let inpWeek=document.createElement('input'); inpWeek.value=t.proposeWeek; inpWeek.readOnly=true; inpWeek.style.background='#f5f5f5'; td2.appendChild(inpWeek);
             let td3=row.insertCell(2); let inpDeadline=document.createElement('input'); inpDeadline.value=t.deadline; inpDeadline.readOnly=true; inpDeadline.style.background='#f5f5f5'; td3.appendChild(inpDeadline);
-            let td4=row.insertCell(3); let sel=document.createElement('select'); sel.innerHTML='<option value="">请选择</option><option>✅ 已完成</option><option>🔴 未完成</option><option>🟡 进行中</option>'; td4.appendChild(sel);
-            let td5=row.insertCell(4); let rea=document.createElement('textarea'); rea.rows=2; rea.placeholder='未完成时填写原因'; rea.value=t.remark||''; td5.appendChild(rea);
+            let td4=row.insertCell(3); let sel=document.createElement('select'); sel.innerHTML='<option value="">请选择</option><option>✅ 已完成</option><option>🔴 未完成</option><option>⏳ 进行中</option>'; td4.appendChild(sel);
+            let td5=row.insertCell(4); let rea=document.createElement('textarea'); rea.rows=2; rea.placeholder='填写完成情况说明（完成内容、遇到的问题、下一步计划等）'; td5.appendChild(rea);
             let td6=row.insertCell(5); let owner=document.createElement('input'); owner.value=filler; owner.readOnly=true; owner.style.background='#f5f5f5'; td6.appendChild(owner);
         });
     }
@@ -477,7 +476,7 @@
         let table = document.createElement('table');
         table.style.width = '100%';
         let thead = document.createElement('thead');
-        if(category === '已有项目评审') thead.innerHTML = '<tr><th>项目名称</th><th>阶段</th><th>进度%</th><th>本周进展</th><th>风险/问题</th><th>风险等级</th><th>人力资源饱和度</th><th>负责人</th></tr>';
+        if(category === '已有项目评审') thead.innerHTML = '<tr><th>项目名称</th><th>阶段</th><th>进度%</th><th>本周进展</th><th>风险/问题</th><th>风险等级</th><th>人力资源分配</th></tr>';
         else if(category === '项目完结总结') thead.innerHTML = '<tr><th>项目名称</th><th>复盘结论</th><th>资源释放情况</th><th>经验教训</th></tr>';
         else if(category === '新项目分析与立项') thead.innerHTML = '<tr><th>新项目名称</th><th>需求分析</th><th>资源需求评估</th><th>当前状态</th><th>负责人</th></tr>';
         table.appendChild(thead);
