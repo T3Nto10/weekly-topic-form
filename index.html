@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>议题收集系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #eef2f5; font-family: 'Segoe UI', Roboto, sans-serif; padding: 24px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 24px; padding: 24px 28px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .header { border-bottom: 2px solid #2c6e9e; padding-bottom: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .title { font-size: 1.6rem; font-weight: 700; color: #1e4663; }
+        .mode-switch { display: flex; gap: 12px; margin-bottom: 20px; }
+        .mode-btn { padding: 8px 20px; border-radius: 30px; border: 1px solid #2c6e9e; background: white; cursor: pointer; font-weight: 600; }
+        .mode-btn.active { background: #2c6e9e; color: white; }
+        .mode-panel { display: none; }
+        .mode-panel.active { display: block; }
+        .info-bar { background: #f8fafd; padding: 12px 16px; border-radius: 16px; margin-bottom: 24px; display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+        .info-item { display: flex; gap: 8px; align-items: center; }
+        .info-label { font-weight: 700; color: #2c6e9e; }
+        input, select, textarea { border: 1px solid #cbdde9; border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; font-family: inherit; }
+        .section-title { 
+            font-size: 1.1rem; font-weight: 700; background: #e7f0f9; padding: 8px 14px; 
+            border-left: 5px solid #2c6e9e; margin: 24px 0 12px 0; border-radius: 0 12px 12px 0;
+            cursor: pointer;
+        }
+        .section-title:hover { background: #dce8f2; }
+        .template-content {
+            display: none; background: #fef7e0; color: #7d6608; padding: 10px 14px; border-radius: 12px;
+            font-size: 0.75rem; margin-top: 6px; border-left: 3px solid #e6b422;
+            line-height: 1.5;
+        }
+        .template-content.show { display: block; }
+        .template-hint { font-size: 0.7rem; color: #c97e00; margin-left: 12px; font-weight: normal; }
+        .sub-section { margin: 16px 0 8px 0; padding-left: 8px; border-left: 3px solid #8db5d6; font-weight: 600; color: #1e5d9e; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 0.8rem; }
+        th { background: #eef3fc; border: 1px solid #d4e0ea; padding: 8px 6px; font-weight: 700; text-align: center; }
+        td { border: 1px solid #e2e8f0; padding: 8px 6px; vertical-align: top; }
+        .btn-group { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2eaf1; }
+        .btn { padding: 8px 20px; border-radius: 24px; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
+        .btn-primary { background: #2c6e9e; color: white; }
+        .btn-secondary { background: #e2e8f0; color: #1e4663; }
+        .auto-tip { background: #e8f4fd; border-radius: 8px; padding: 6px 12px; font-size: 0.7rem; color: #2c6e9e; margin-bottom: 8px; display: inline-block; }
+        .footer-note { margin-top: 24px; font-size: 0.7rem; text-align: center; color: #8aa0bc; padding-top: 12px; border-top: 1px solid #e2eaf1; }
+        textarea { width: 100%; resize: vertical; }
+        .btn-icon { background: #f0f4f9; border: none; padding: 2px 10px; border-radius: 12px; font-size: 0.65rem; cursor: pointer; margin-left: 8px; }
+        .btn-icon:hover { background: #e2e8f0; }
+        .btn-danger-icon { background: #fde2e2; color: #c0392b; border: none; padding: 2px 10px; border-radius: 12px; font-size: 0.65rem; cursor: pointer; margin-left: 8px; }
+        .btn-danger-icon:hover { background: #fcc; }
+        @media (max-width: 800px) { .container { padding: 16px; } th, td { font-size: 0.7rem; padding: 4px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">📋 电气周会 · 议题收集系统</div>
+        <div style="font-size:0.7rem; color:#6c86a3;">负责人填写版</div>
+    </div>
+
+    <div class="mode-switch">
+        <button class="mode-btn" onclick="switchMode('admin')">🔧 任务库预览（只读）</button>
+        <button class="mode-btn active" onclick="switchMode('fill')">📝 填写模式（负责人填写）</button>
+    </div>
+
+    <!-- ========== 模式1：任务库预览（只读） ========== -->
+    <div id="adminPanel" class="mode-panel">
+        <div class="info-bar">
+            <div class="info-item"><span class="info-label">当前周次：</span><span id="adminWeekDisplay" style="font-weight:600;">W24</span></div>
+            <div class="info-item"><span class="info-label">💡 说明：</span><span style="color:#5c6f87;">以下任务来源于上周（W23）周会「下一步行动计划」</span></div>
+        </div>
+        <div id="taskTablesContainer"></div>
+        <div class="footer-note">✅ 任务库由汇总人根据上周会议纪要更新</div>
+    </div>
+
+    <!-- ========== 模式2：填写模式 ========== -->
+    <div id="fillPanel" class="mode-panel active">
+        <div class="info-bar">
+            <div class="info-item"><span class="info-label">填写人：</span>
+                <select id="fillerName" onchange="onFillerChange()" style="width:140px"><option value="">请选择</option></select>
+            </div>
+            <div class="info-item"><span class="info-label">填写周次：</span><select id="fillWeek" style="width:160px;"></select></div>
+            <div class="info-item"><span class="info-label">📌 提示：</span><span style="font-size:0.7rem;">点击议题标题查看模板</span></div>
+        </div>
+
+        <!-- 议题一 -->
+        <div class="section-title" onclick="toggleTemplate('template_task')">
+            📌 议题一：上周任务闭环回顾 <span class="template-hint">ⓘ 点击查看模板</span>
+        </div>
+        <div id="template_task" class="template-content">【议题一模板】逐项核对上周任务完成情况，评估是否按时、达标，分析未完成原因</div>
+        
+        <div class="auto-tip" id="taskTip">💡 请先在上方选择填写人</div>
+        <table id="table_task">
+            <thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:25%">未完成原因</th><th style="width:8%">负责人</th></tr></thead>
+            <tbody id="taskTbody"></tbody>
+        </table>
+
+        <!-- 议题二 -->
+        <div class="section-title" onclick="toggleTemplate('template_org')">
+            👥 议题二：组织人才与能力建设 <span class="template-hint">ⓘ 点击查看模板</span>
+        </div>
+        <div id="template_org" class="template-content">【议题二模板】<br>1.招聘 2.离职 3.培训 4.述职 5.文化(EQP精神传达) 6.能力建设</div>
+        
+        <div style="background: #fff3e0; border-left: 3px solid #e6b422; padding: 8px 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.75rem; color: #7d6608;">
+            💡 如果您是本周会议主持人，请在下方「文化建设」小类中填写 EQP 周会精神传达内容
+        </div>
+        
+        <div class="sub-section">➕ 添加组织人才项（选择小类）</div>
+        <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
+            <select id="orgCategorySelect" style="width:200px;">
+                <option value="招聘工作">📢 招聘工作</option>
+                <option value="离职情况">📉 离职情况</option>
+                <option value="培训培养">🎓 培训培养</option>
+                <option value="述职提醒">📅 述职提醒</option>
+                <option value="文化建设">🌟 文化建设（含EQP精神传达）</option>
+                <option value="能力建设">⚙️ 能力建设</option>
+            </select>
+            <button class="btn btn-secondary" style="padding:4px 16px;" onclick="addOrgRow()">+ 添加此小类</button>
+        </div>
+        <div id="orgTablesContainer"></div>
+
+        <!-- 议题三 -->
+        <div class="section-title" onclick="toggleTemplate('template_process')">
+            🔐 议题三：机制流程/信息安全/质量合规 <span class="template-hint">ⓘ 点击查看模板</span>
+        </div>
+        <div id="template_process" class="template-content">【议题三模板】检查公司及部门层面的机制流程、信息安全、质量规范的执行与更新情况</div>
+        <table id="table_compliance">
+            <thead><tr><th>事项</th><th>当前状态</th><th>本周进展</th><th>下一步计划</th><th>负责人</th><th>完成时间</th><th style="width:60px">操作</th></tr></thead>
+            <tbody id="complianceTbody"><tr><td colspan="7" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr></tbody>
+        </table>
+        <button class="btn btn-secondary" style="font-size:0.7rem;" onclick="addComplianceRow()">+ 添加事项</button>
+
+        <!-- 议题四 -->
+        <div class="section-title" onclick="toggleTemplate('template_project')">
+            🏭 议题四：具体业务 <span class="template-hint">ⓘ 点击查看模板</span>
+        </div>
+        <div id="template_project" class="template-content">【议题四模板】<br>1.已有项目评审 2.项目完结总结 3.新项目分析与立项</div>
+        
+        <div class="sub-section">➕ 添加具体业务项（选择小类）</div>
+        <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
+            <select id="bizCategorySelect" style="width:200px;">
+                <option value="已有项目评审">📌 已有项目评审</option>
+                <option value="项目完结总结">✅ 项目完结总结</option>
+                <option value="新项目分析与立项">🆕 新项目分析与立项</option>
+            </select>
+            <button class="btn btn-secondary" style="padding:4px 16px;" onclick="addBizRow()">+ 添加此小类</button>
+        </div>
+        <div id="bizTablesContainer"></div>
+
+        <!-- 议题五 -->
+        <div class="section-title" onclick="toggleTemplate('template_decision')">
+            🤝 议题五：共同决策 <span class="template-hint">ⓘ 点击查看模板</span>
+        </div>
+        <div id="template_decision" class="template-content">【议题五模板】汇报需共同决策事项的各选项逻辑，给出相关材料及建议方案</div>
+        <table id="table_decision">
+            <thead><tr><th>决策事项</th><th>背景/选项逻辑</th><th>建议方案</th><th>需决策时间</th><th>提出人</th><th style="width:60px">操作</th></tr></thead>
+            <tbody id="decisionTbody"><tr><td colspan="6" style="text-align:center;">点击下方按钮添加决策项</td><td style="display:none;"></td></tr></tbody>
+        </table>
+        <button class="btn btn-secondary" style="font-size:0.7rem;" onclick="addDecisionRow()">+ 添加决策</button>
+
+        <!-- 议题六 -->
+        <div class="section-title" onclick="toggleTemplate('template_other')">
+            📌 议题六：其他 <span class="template-hint">ⓘ 点击查看模板</span>
+        </div>
+        <div id="template_other" class="template-content">【议题六模板】讨论其他未出现在上述分类中的议题，收集并归类，纳入后续跟踪</div>
+        <table id="table_other">
+            <thead><tr><th>事项</th><th>说明</th><th>建议</th><th>提出人</th><th style="width:60px">操作</th></tr></thead>
+            <tbody id="otherTbody"><tr><td colspan="5" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr></tbody>
+        </table>
+        <button class="btn btn-secondary" style="font-size:0.7rem;" onclick="addOtherRow()">+ 添加事项</button>
+
+        <div class="btn-group">
+            <button class="btn btn-secondary" onclick="clearFillData()">清空当前填写</button>
+            <button class="btn btn-primary" onclick="exportFillData()">📎 导出数据（发回汇总人）</button>
+        </div>
+    </div>
+
+    <div class="footer-note">💡 填写流程：选择姓名 → 自动加载任务 → 勾选完成情况 → 添加小类数据 → 导出JSON发回汇总人<br>© 议题收集系统 v0.1 | 制作者：何锦仪</div>
+</div>
+
+<script>
+    // ==================== 任务库 - 仅来源于上周周会「下一步行动计划」 ====================
+    // 提出周次统一为 W23，预计完成时间根据行动计划中的描述填写
+    let taskLibrary = {
+        "关雪丹": [
+            { task: "输出工时填报规则文档并在群内发布", proposeWeek: "W23", deadline: "下周", remark: "协同刘金山" },
+            { task: "赴宜昌现场考察，协调气源问题", proposeWeek: "W23", deadline: "下周", remark: "现场推动厂务解决气压问题" },
+            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前", remark: "协同刘金山" },
+            { task: "将监造要求写入电气开发流程", proposeWeek: "W23", deadline: "跟进", remark: "升版文件" }
+        ],
+        "吴忠明": [
+            { task: "制定海目星装配段监造策略", proposeWeek: "W23", deadline: "本周", remark: "协同张海龙，远程+现场方案" }
+        ],
+        "张海龙": [
+            { task: "制定海目星装配段监造策略", proposeWeek: "W23", deadline: "本周", remark: "协同吴忠明，输出方案" },
+            { task: "完成大成烤箱KT打分复盘", proposeWeek: "W23", deadline: "跟进", remark: "西门子能力不足问题复盘" }
+        ],
+        "梁志强": [],
+        "刘金山": [
+            { task: "输出工时填报规则文档并在群内发布", proposeWeek: "W23", deadline: "下周", remark: "协同关雪丹，动力侧规则对齐" },
+            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前", remark: "协同关雪丹" }
+        ],
+        "李燏": [
+            { task: "输出CRA认证专题报告", proposeWeek: "W23", deadline: "6月底", remark: "" }
+        ],
+        "何锦仪": [
+            { task: "优化周会模板（增加实际完成列、周次标识、会前收集机制）", proposeWeek: "W23", deadline: "下周会前", remark: "" }
+        ]
+    };
+    let personList = Object.keys(taskLibrary).filter(name => taskLibrary[name].length > 0);
+
+    // ==================== 周次计算 ====================
+    function getWeekNumber(date) {
+        const d = new Date(date); d.setHours(0,0,0,0);
+        d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+        const week1 = new Date(d.getFullYear(), 0, 4);
+        return 1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    }
+    function getWeekRangeText(date) {
+        const day = date.getDay();
+        const monday = new Date(date);
+        monday.setDate(date.getDate() - (day === 0 ? 6 : day - 1));
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        const f = d => `${d.getMonth()+1}/${d.getDate()}`;
+        return `W${getWeekNumber(date)} (${f(monday)}-${f(sunday)})`;
+    }
+    function initWeekOptions() {
+        const select = document.getElementById('fillWeek');
+        if(!select) return;
+        const today = new Date();
+        let weeks = [];
+        for(let i=-2;i<=2;i++) { let d=new Date(today); d.setDate(today.getDate()+i*7); weeks.push(getWeekRangeText(d)); }
+        weeks.sort((a,b)=>parseInt(a.match(/W(\d+)/)[1])-parseInt(b.match(/W(\d+)/)[1]));
+        select.innerHTML = weeks.map(w=>`<option value="${w}">${w}</option>`).join('');
+        select.value = getWeekRangeText(today);
+        document.getElementById('adminWeekDisplay').innerText = select.value;
+    }
+
+    // ========== 任务库预览（只读） ==========
+    function renderAdminTables() {
+        const container = document.getElementById('taskTablesContainer');
+        if(!container) return;
+        container.innerHTML = '';
+        for(let [person, tasks] of Object.entries(taskLibrary)) {
+            if(tasks.length === 0) continue;
+            let card = document.createElement('div');
+            card.style.marginBottom = '20px';
+            card.style.border = '1px solid #dce5ec';
+            card.style.borderRadius = '16px';
+            card.style.padding = '14px';
+            card.style.background = '#fafcff';
+            let title = document.createElement('div');
+            title.style.fontWeight = '700';
+            title.style.borderLeft = '3px solid #2c6e9e';
+            title.style.paddingLeft = '10px';
+            title.style.marginBottom = '12px';
+            title.innerText = `👤 ${person}`;
+            card.appendChild(title);
+            let table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.fontSize = '0.75rem';
+            table.style.borderCollapse = 'collapse';
+            let thead = document.createElement('thead');
+            thead.innerHTML = `<tr><th style="text-align:left">任务描述</th><th style="width:80px">提出周次</th><th style="width:80px">预计完成时间</th><th>备注</th></tr>`;
+            table.appendChild(thead);
+            let tbody = document.createElement('tbody');
+            tasks.forEach(t => {
+                let row = tbody.insertRow();
+                let td1 = row.insertCell(0); td1.innerText = t.task; td1.style.border = '1px solid #e2e8f0'; td1.style.padding = '8px';
+                let td2 = row.insertCell(1); td2.innerText = t.proposeWeek; td2.style.border = '1px solid #e2e8f0'; td2.style.padding = '8px';
+                let td3 = row.insertCell(2); td3.innerText = t.deadline; td3.style.border = '1px solid #e2e8f0'; td3.style.padding = '8px';
+                let td4 = row.insertCell(3); td4.innerText = t.remark || ''; td4.style.border = '1px solid #e2e8f0'; td4.style.padding = '8px';
+            });
+            table.appendChild(tbody);
+            card.appendChild(table);
+            container.appendChild(card);
+        }
+    }
+
+    // ========== 填写模式 ==========
+    function updatePersonSelect() {
+        const sel = document.getElementById('fillerName');
+        if(!sel) return;
+        let cur = sel.value;
+        sel.innerHTML = '<option value="">请选择</option>' + personList.map(n=>`<option value="${n}">${n}</option>`).join('');
+        if(cur && personList.includes(cur)) sel.value = cur;
+        else onFillerChange();
+    }
+
+    function onFillerChange() {
+        let filler = document.getElementById('fillerName').value;
+        let tbody = document.getElementById('taskTbody');
+        let tip = document.getElementById('taskTip');
+        if(!filler){ tip.innerHTML='💡 请先在上方选择填写人'; tbody.innerHTML=''; return; }
+        let tasks = taskLibrary[filler] || [];
+        tip.innerHTML = `✅ 已加载 ${filler} 负责的 ${tasks.length} 项上周任务（W23），请确认完成情况`;
+        tbody.innerHTML = '';
+        if(!tasks.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;">暂无任务</td></tr>'; return; }
+        tasks.forEach(t=>{
+            let row=tbody.insertRow();
+            let td1=row.insertCell(0); let ta=document.createElement('textarea'); ta.rows=2; ta.style.width='100%'; ta.value=t.task; td1.appendChild(ta);
+            let td2=row.insertCell(1); let inpWeek=document.createElement('input'); inpWeek.value=t.proposeWeek; inpWeek.readOnly=true; inpWeek.style.background='#f5f5f5'; td2.appendChild(inpWeek);
+            let td3=row.insertCell(2); let inpDeadline=document.createElement('input'); inpDeadline.value=t.deadline; inpDeadline.readOnly=true; inpDeadline.style.background='#f5f5f5'; td3.appendChild(inpDeadline);
+            let td4=row.insertCell(3); let sel=document.createElement('select'); sel.innerHTML='<option value="">请选择</option><option>✅ 已完成</option><option>🔴 未完成</option><option>🟡 进行中</option>'; td4.appendChild(sel);
+            let td5=row.insertCell(4); let rea=document.createElement('textarea'); rea.rows=2; rea.placeholder='未完成时填写原因'; rea.value=t.remark||''; td5.appendChild(rea);
+            let td6=row.insertCell(5); let owner=document.createElement('input'); owner.value=filler; owner.readOnly=true; owner.style.background='#f5f5f5'; td6.appendChild(owner);
+        });
+    }
+
+    // 删除整个小类
+    function deleteDynamicCategory(btn) {
+        if(confirm('确定删除整个小类吗？')) {
+            let wrapper = btn.closest('.dynamic-category-wrapper');
+            if(wrapper) wrapper.remove();
+        }
+    }
+
+    // 添加组织人才小类
+    function addOrgRow() {
+        let category = document.getElementById('orgCategorySelect').value;
+        let container = document.getElementById('orgTablesContainer');
+        let wrapper = document.createElement('div');
+        wrapper.className = 'dynamic-category-wrapper';
+        wrapper.style.marginBottom = '20px';
+        wrapper.style.border = '1px solid #e2e8f0';
+        wrapper.style.borderRadius = '12px';
+        wrapper.style.padding = '10px';
+        wrapper.style.background = '#fefefe';
+        
+        let titleSpan = document.createElement('div');
+        titleSpan.style.fontWeight = '600';
+        titleSpan.style.marginBottom = '8px';
+        titleSpan.style.display = 'flex';
+        titleSpan.style.justifyContent = 'space-between';
+        titleSpan.style.alignItems = 'center';
+        titleSpan.innerHTML = `<span>📌 ${category}</span>
+            <button class="btn-danger-icon" onclick="deleteDynamicCategory(this)">❌ 删除本小类</button>`;
+        wrapper.appendChild(titleSpan);
+        
+        let table = document.createElement('table');
+        table.style.width = '100%';
+        let thead = document.createElement('thead');
+        if(category === '招聘工作') thead.innerHTML = '<tr><th>团队</th><th>正式编制需求</th><th>已入职</th><th>待入职(日期)</th><th>面试中</th><th>卡点说明</th><th>负责人</th></tr>';
+        else if(category === '离职情况') thead.innerHTML = '<tr><th>团队</th><th>离职人数</th><th>姓名</th><th>离职原因</th><th>是否B+及以上</th><th>改进措施</th></tr>';
+        else if(category === '培训培养') thead.innerHTML = '<tr><th>团队</th><th>培训次数</th><th>培训类型</th><th>培训主题</th><th>参训人数</th><th>效果评估</th></tr>';
+        else if(category === '述职提醒') thead.innerHTML = '<tr><th>团队</th><th>转正人数</th><th>姓名</th><th>转正日期</th><th>是否已提醒</th><th>计划述职日期</th></tr>';
+        else if(category === '文化建设') {
+            thead.innerHTML = '<tr><th>传达主题</th><th>精神/要点内容</th><th>传达人</th><th>传达日期</th></tr>';
+            table.appendChild(thead);
+            let tbody = document.createElement('tbody');
+            let row = tbody.insertRow();
+            row.insertCell(0).innerHTML = '<input style="width:100%" placeholder="例：成本优先/EQP精神">';
+            row.insertCell(1).innerHTML = '<textarea rows="2" style="width:100%" placeholder="请填写本次会议需要传达的精神要点"></textarea>';
+            row.insertCell(2).innerHTML = '<input style="width:100%" placeholder="主持人姓名">';
+            row.insertCell(3).innerHTML = '<input style="width:100%" placeholder="会议日期">';
+            table.appendChild(tbody);
+            wrapper.appendChild(table);
+            
+            let addRowBtn = document.createElement('button');
+            addRowBtn.innerText = '+ 添加本小类行';
+            addRowBtn.style.fontSize = '0.7rem';
+            addRowBtn.style.background = '#eef3fc';
+            addRowBtn.style.border = 'none';
+            addRowBtn.style.padding = '4px 12px';
+            addRowBtn.style.borderRadius = '16px';
+            addRowBtn.style.cursor = 'pointer';
+            addRowBtn.style.marginTop = '8px';
+            addRowBtn.onclick = () => { 
+                let tb = table.querySelector('tbody');
+                if(tb) {
+                    let newRow = tb.insertRow();
+                    for(let i=0;i<4;i++) newRow.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
+                }
+            };
+            wrapper.appendChild(addRowBtn);
+            container.appendChild(wrapper);
+            return;
+        } else if(category === '能力建设') thead.innerHTML = '<tr><th>技术/事项</th><th>进展状态</th><th>说明</th><th>负责人</th></tr>';
+        
+        table.appendChild(thead);
+        let tbody = document.createElement('tbody');
+        let colCount = thead.querySelectorAll('th').length;
+        let row = tbody.insertRow();
+        for(let i=0;i<colCount;i++) row.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
+        table.appendChild(tbody);
+        wrapper.appendChild(table);
+        
+        let addRowBtn = document.createElement('button');
+        addRowBtn.innerText = '+ 添加本小类行';
+        addRowBtn.style.fontSize = '0.7rem';
+        addRowBtn.style.background = '#eef3fc';
+        addRowBtn.style.border = 'none';
+        addRowBtn.style.padding = '4px 12px';
+        addRowBtn.style.borderRadius = '16px';
+        addRowBtn.style.cursor = 'pointer';
+        addRowBtn.style.marginTop = '8px';
+        addRowBtn.onclick = () => { 
+            let tb = table.querySelector('tbody');
+            if(tb) {
+                let newRow = tb.insertRow();
+                for(let i=0;i<colCount;i++) newRow.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
+            }
+        };
+        wrapper.appendChild(addRowBtn);
+        container.appendChild(wrapper);
+    }
+
+    // 议题三/五/六的添加行
+    function addComplianceRow() { addRowWithDelete('complianceTbody', 7); }
+    function addDecisionRow() { addRowWithDelete('decisionTbody', 6); }
+    function addOtherRow() { addRowWithDelete('otherTbody', 5); }
+    
+    function addRowWithDelete(tbodyId, colCount) {
+        let tbody = document.getElementById(tbodyId);
+        if(!tbody) return;
+        if(tbody.children.length === 1 && tbody.children[0].innerText.includes('点击下方按钮')) tbody.innerHTML = '';
+        let newRow = tbody.insertRow();
+        for(let i=0;i<colCount-1;i++) newRow.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
+        let delCell = newRow.insertCell(colCount-1);
+        let delBtn = document.createElement('button');
+        delBtn.innerText = '删除';
+        delBtn.style.background = '#fde2e2';
+        delBtn.style.border = 'none';
+        delBtn.style.padding = '2px 10px';
+        delBtn.style.borderRadius = '12px';
+        delBtn.style.cursor = 'pointer';
+        delBtn.onclick = () => newRow.remove();
+        delCell.appendChild(delBtn);
+    }
+
+    // 议题四动态业务小类
+    function addBizRow() {
+        let category = document.getElementById('bizCategorySelect').value;
+        let container = document.getElementById('bizTablesContainer');
+        let wrapper = document.createElement('div');
+        wrapper.className = 'dynamic-category-wrapper';
+        wrapper.style.marginBottom = '20px';
+        wrapper.style.border = '1px solid #e2e8f0';
+        wrapper.style.borderRadius = '12px';
+        wrapper.style.padding = '10px';
+        
+        let titleSpan = document.createElement('div');
+        titleSpan.style.fontWeight = '600';
+        titleSpan.style.marginBottom = '8px';
+        titleSpan.style.display = 'flex';
+        titleSpan.style.justifyContent = 'space-between';
+        titleSpan.style.alignItems = 'center';
+        titleSpan.innerHTML = `<span>📌 ${category}</span>
+            <button class="btn-danger-icon" onclick="deleteDynamicCategory(this)">❌ 删除本小类</button>`;
+        wrapper.appendChild(titleSpan);
+        
+        let table = document.createElement('table');
+        table.style.width = '100%';
+        let thead = document.createElement('thead');
+        if(category === '已有项目评审') thead.innerHTML = '<tr><th>项目名称</th><th>阶段</th><th>进度%</th><th>本周进展</th><th>风险/问题</th><th>风险等级</th><th>人力资源饱和度</th><th>负责人</th></tr>';
+        else if(category === '项目完结总结') thead.innerHTML = '<tr><th>项目名称</th><th>复盘结论</th><th>资源释放情况</th><th>经验教训</th></tr>';
+        else if(category === '新项目分析与立项') thead.innerHTML = '<tr><th>新项目名称</th><th>需求分析</th><th>资源需求评估</th><th>当前状态</th><th>负责人</th></tr>';
+        table.appendChild(thead);
+        let tbody = document.createElement('tbody');
+        let colCount = thead.querySelectorAll('th').length;
+        let row = tbody.insertRow();
+        for(let i=0;i<colCount;i++) row.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
+        table.appendChild(tbody);
+        wrapper.appendChild(table);
+        
+        let addRowBtn = document.createElement('button');
+        addRowBtn.innerText = '+ 添加本小类行';
+        addRowBtn.style.fontSize = '0.7rem';
+        addRowBtn.style.background = '#eef3fc';
+        addRowBtn.style.border = 'none';
+        addRowBtn.style.padding = '4px 12px';
+        addRowBtn.style.borderRadius = '16px';
+        addRowBtn.style.cursor = 'pointer';
+        addRowBtn.style.marginTop = '8px';
+        addRowBtn.onclick = () => { 
+            let tb = table.querySelector('tbody');
+            if(tb) {
+                let newRow = tb.insertRow();
+                for(let i=0;i<colCount;i++) newRow.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
+            }
+        };
+        wrapper.appendChild(addRowBtn);
+        container.appendChild(wrapper);
+    }
+
+    function clearFillData() {
+        if(!confirm('清空当前填写的所有数据吗？')) return;
+        document.getElementById('fillerName').value = '';
+        document.getElementById('taskTbody').innerHTML = '';
+        document.getElementById('taskTip').innerHTML = '💡 请先在上方选择填写人';
+        document.getElementById('orgTablesContainer').innerHTML = '';
+        document.getElementById('bizTablesContainer').innerHTML = '';
+        document.getElementById('complianceTbody').innerHTML = '<tr><td colspan="7" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr>';
+        document.getElementById('decisionTbody').innerHTML = '<tr><td colspan="6" style="text-align:center;">点击下方按钮添加决策项</td><td style="display:none;"></td></tr>';
+        document.getElementById('otherTbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr>';
+    }
+
+    function exportFillData() {
+        let filler = document.getElementById('fillerName').value || '未填写';
+        let week = document.getElementById('fillWeek').value || 'W?';
+        let getTbodyData = (tbodyId, excludeLastOpCol=true) => {
+            let tbody = document.getElementById(tbodyId);
+            if(!tbody) return [];
+            let rows = [];
+            for(let tr of tbody.querySelectorAll('tr')) {
+                let row = [];
+                let cells = tr.querySelectorAll('td');
+                let maxLen = excludeLastOpCol ? cells.length-1 : cells.length;
+                for(let i=0;i<maxLen;i++) {
+                    let inp = cells[i].querySelector('input,textarea,select');
+                    row.push(inp ? inp.value : cells[i].innerText.trim());
+                }
+                if(row.some(v=>v && v!=='点击下方按钮添加')) rows.push(row);
+            }
+            return rows;
+        };
+        let getDynamicData = (containerId) => {
+            let result = [];
+            let containers = document.querySelectorAll(`#${containerId} > div`);
+            containers.forEach(div=>{
+                let titleSpan = div.querySelector('div:first-child span:first-child');
+                let category = titleSpan ? titleSpan.innerText.replace('📌','').trim() : '';
+                let rows = [];
+                let table = div.querySelector('table');
+                if(table){
+                    let tbody = table.querySelector('tbody');
+                    if(tbody){
+                        for(let tr of tbody.querySelectorAll('tr')){
+                            let row=[];
+                            for(let td of tr.querySelectorAll('td')){
+                                let inp = td.querySelector('input,textarea,select');
+                                row.push(inp ? inp.value : '');
+                            }
+                            if(row.some(v=>v)) rows.push(row);
+                        }
+                    }
+                }
+                if(category && rows.length>0) result.push({category, rows});
+            });
+            return result;
+        };
+        let out = {
+            meta: { filler, week, exportTime: new Date().toISOString() },
+            task_closed: getTbodyData('taskTbody', false),
+            org_dynamic: getDynamicData('orgTablesContainer'),
+            biz_dynamic: getDynamicData('bizTablesContainer'),
+            compliance: getTbodyData('complianceTbody', true),
+            decision: getTbodyData('decisionTbody', true),
+            other: getTbodyData('otherTbody', true)
+        };
+        let a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
+        a.download = `周会收集_${filler}_${week.replace(/[\/\(\)]/g,'_')}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        alert('导出成功！请将文件发回给汇总人（何锦仪）');
+    }
+
+    function toggleTemplate(id) { document.getElementById(id)?.classList.toggle('show'); }
+    function switchMode(mode) {
+        let admin=document.getElementById('adminPanel'), fill=document.getElementById('fillPanel');
+        let btns=document.querySelectorAll('.mode-btn');
+        btns.forEach(b=>b.classList.remove('active'));
+        if(mode==='admin'){
+            admin.classList.add('active'); fill.classList.remove('active'); btns[0].classList.add('active');
+            renderAdminTables();
+        } else {
+            admin.classList.remove('active'); fill.classList.add('active'); btns[1].classList.add('active');
+            updatePersonSelect();
+        }
+    }
+
+    initWeekOptions();
+    renderAdminTables();
+    updatePersonSelect();
+</script>
+</body>
+</html>
