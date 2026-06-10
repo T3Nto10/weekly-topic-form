@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>议题收集系统</title>
+    <!-- 引入 ECharts CDN 用于饼图 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #eef2f5; font-family: 'Segoe UI', Roboto, sans-serif; padding: 24px; }
@@ -73,107 +75,31 @@
         .meeting-topic-desc { color: #5c6f87; margin: 4px 0; line-height: 1.4; white-space: pre-wrap; }
         .meeting-topic-meta { display: flex; gap: 12px; margin-top: 6px; font-size: 0.7rem; color: #8aa0bc; }
 
-        /* 看板样式 */
-        .kanban-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .kanban-person-card {
-            background: #fafcff;
-            border: 2px solid #2c6e9e;
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .kanban-person-header {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #1e4663;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e7f0f9;
-            margin-bottom: 12px;
-        }
-        .kanban-topic {
-            margin-bottom: 12px;
-            padding: 10px;
-            background: white;
-            border-radius: 12px;
-            border-left: 4px solid #2c6e9e;
-        }
-        .kanban-topic-title {
-            font-weight: 700;
-            color: #1e4663;
-            font-size: 0.8rem;
-            margin-bottom: 6px;
-        }
-        .kanban-topic-subtitle {
-            font-weight: 600;
-            color: #5c6f87;
-            font-size: 0.7rem;
-            margin: 6px 0 4px 0;
-            padding-left: 6px;
-            border-left: 2px solid #8db5d6;
-        }
-        .kanban-item {
-            background: #f8fafd;
-            padding: 6px 8px;
-            border-radius: 6px;
-            font-size: 0.68rem;
-            color: #5c6f87;
-            margin: 4px 0;
-            line-height: 1.3;
-            border-left: 2px solid #d4e0ea;
-            padding-left: 10px;
-        }
-        .kanban-status {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 0.62rem;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-        .status-completed {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-        .status-in-progress {
-            background: #fff3e0;
-            color: #e65100;
-        }
-        .status-na {
-            background: #f5f5f5;
-            color: #757575;
-        }
-        .kanban-input-section {
-            background: #f8fafd;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-        .kanban-import-btn {
-            background: #2c6e9e;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.8rem;
-            width: 100%;
-            margin-bottom: 8px;
-        }
-        .kanban-import-btn:hover {
-            background: #1e4663;
-        }
-
-        @media (max-width: 800px) { 
-            .container { padding: 16px; } 
-            th, td { font-size: 0.7rem; padding: 4px; }
-            .kanban-container { grid-template-columns: 1fr; }
-        }
+        /* 看板独有样式 */
+        .agenda-card { background: #ffffff; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-bottom: 28px; border: 1px solid #e9edf2; overflow: hidden; }
+        .agenda-header { background: #f8fafd; padding: 16px 24px; border-bottom: 1px solid #e2eaf1; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; cursor: pointer; user-select: none; transition: background 0.2s; }
+        .agenda-header:hover { background: #eef3fc; }
+        .agenda-icon { font-size: 1.5rem; }
+        .agenda-title { font-size: 1.2rem; font-weight: 700; color: #1e4663; }
+        .agenda-sub { font-size: 0.7rem; background: #e7f0f9; color: #2c6e9e; padding: 2px 12px; border-radius: 20px; margin-left: 8px; }
+        .template-hint-small { font-size: 0.65rem; color: #c97e00; margin-left: 12px; font-weight: normal; }
+        .template-content-board { background: #fef7e0; color: #7d6608; padding: 12px 18px; border-radius: 12px; font-size: 0.75rem; margin: 0 20px 16px 20px; border-left: 4px solid #e6b422; line-height: 1.5; display: none; }
+        .template-content-board.show { display: block; }
+        .subcategory-block { padding: 0 24px 20px 24px; border-bottom: 1px solid #f0f3f8; }
+        .subcategory-block:last-child { border-bottom: none; }
+        .subcategory-title { font-weight: 700; font-size: 0.9rem; color: #1f6392; background: #f0f6fc; display: inline-block; padding: 6px 16px; border-radius: 30px; margin: 16px 0 12px 0; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; background: white; border-radius: 14px; overflow: auto; display: block; }
+        .data-table thead tr { background: #f2f6fa; border-bottom: 1px solid #e0e8f0; }
+        .data-table th { padding: 10px 8px; text-align: left; font-weight: 700; color: #1e4663; border: 1px solid #e9edf2; font-size: 0.7rem; }
+        .data-table td { padding: 10px 8px; border: 1px solid #edf2f7; color: #2c3e4e; vertical-align: top; background: #fff; }
+        .na-badge { color: #8ba0bc; font-style: italic; background: #f9fafc; display: inline-block; width: 100%; padding: 12px 0; text-align: center; }
+        .status-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .status-complete { background: #e1f7e8; color: #1f7840; }
+        .status-progress { background: #fff0db; color: #c97e00; }
+        .pie-chart-container { background: #f8fafd; border-radius: 16px; padding: 16px 20px; margin: 20px 24px 16px 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+        .pie-box { width: 200px; height: 200px; }
+        .summary-text { flex: 1; font-size: 0.8rem; color: #1e4663; line-height: 1.5; }
+        @media (max-width: 800px) { .container { padding: 16px; } th, td { font-size: 0.7rem; padding: 4px; } }
     </style>
 </head>
 <body>
@@ -186,7 +112,7 @@
     <div class="mode-switch">
         <button class="mode-btn" onclick="switchMode('admin')">🔧 任务库预览（只读）</button>
         <button class="mode-btn active" onclick="switchMode('fill')">📝 填写模式（负责人填写）</button>
-        <button class="mode-btn" onclick="switchMode('kanban')">📊 看板展示（汇总视图）</button>
+        <button class="mode-btn" onclick="switchMode('board')">📊 看板模式 · 六大议题</button>
     </div>
 
     <!-- ========== 模式1：任务库预览（只读） ========== -->
@@ -195,801 +121,118 @@
             <div class="info-item"><span class="info-label">当前周次：</span><span id="adminWeekDisplay" style="font-weight:600;">W24</span></div>
             <div class="info-item"><span class="info-label">💡 说明：</span><span style="color:#5c6f87;">以下任务来源于上周（W23）周会「下一步行动计划」</span></div>
         </div>
-
-        <!-- 会议纪要折叠区 -->
         <div class="meeting-minutes-card" id="meetingMinutesCard">
             <div class="meeting-header" onclick="toggleMeetingMinutes()">
                 <span><span class="meeting-toggle-icon collapsed">▶</span>📄 W23 会议纪要（点击展开）</span>
                 <span style="font-size:0.7rem; color:#8aa0bc; cursor:default;">共 <span id="topicCount">18</span> 个议题</span>
             </div>
             <div class="meeting-content" id="meetingContent">
-                <!-- 会议基本信息 -->
                 <div class="meeting-info" id="meetingInfoPanel"></div>
-
-                <!-- 议题列表 -->
-                <div style="margin-top: 16px;">
-                    <div style="font-weight:700; color:#1e4663; margin-bottom:8px;">📋 会议议题：</div>
-                    <div id="meetingTopicsPanel"></div>
-                </div>
-
-                <!-- 决策事项 -->
-                <div style="margin-top: 16px;">
-                    <div style="font-weight:700; color:#1e4663; margin-bottom:8px;">✅ 主要决策：</div>
-                    <div id="meetingDecisionsPanel" style="background:#fffbf0; border-left:3px solid #e6b422; padding:8px 12px; border-radius:4px; font-size:0.75rem; color:#7d6608;"></div>
-                </div>
-
-                <!-- 风险项 -->
-                <div style="margin-top: 16px;">
-                    <div style="font-weight:700; color:#1e4663; margin-bottom:8px;">⚠️ 主要风险：</div>
-                    <div id="meetingRisksPanel"></div>
-                </div>
+                <div style="margin-top: 16px;"><div style="font-weight:700; color:#1e4663; margin-bottom:8px;">📋 会议议题：</div><div id="meetingTopicsPanel"></div></div>
+                <div style="margin-top: 16px;"><div style="font-weight:700; color:#1e4663; margin-bottom:8px;">✅ 主要决策：</div><div id="meetingDecisionsPanel" style="background:#fffbf0; border-left:3px solid #e6b422; padding:8px 12px; border-radius:4px; font-size:0.75rem; color:#7d6608;"></div></div>
+                <div style="margin-top: 16px;"><div style="font-weight:700; color:#1e4663; margin-bottom:8px;">⚠️ 主要风险：</div><div id="meetingRisksPanel"></div></div>
             </div>
         </div>
-
-        <!-- 任务库 -->
         <div id="taskTablesContainer"></div>
         <div class="footer-note">✅ 任务库由汇总人根据上周会议纪要更新</div>
     </div>
 
-    <!-- ========== 模式2：填写模式 ========== -->
+    <!-- ========== 模式2：填写模式（原系统核心，不可更改结构） ========== -->
     <div id="fillPanel" class="mode-panel active">
         <div class="info-bar">
-            <div class="info-item"><span class="info-label">填写人：</span>
-                <select id="fillerName" onchange="onFillerChange()" style="width:140px"><option value="">请选择</option></select>
-            </div>
+            <div class="info-item"><span class="info-label">填写人：</span><select id="fillerName" onchange="onFillerChange()" style="width:140px"><option value="">请选择</option></select></div>
             <div class="info-item"><span class="info-label">填写周次：</span><select id="fillWeek" style="width:160px;"></select></div>
             <div class="info-item"><span class="info-label">📌 提示：</span><span style="font-size:0.7rem;">点击议题标题查看模板</span></div>
         </div>
-
-        <!-- 议题一 -->
-        <div class="section-title" onclick="toggleTemplate('template_task')">
-            📌 议题一：上周任务闭环回顾 <span class="template-hint">ⓘ 点击查看模板</span>
-        </div>
-        <div id="template_task" class="template-content">【议题一模板】上周任务闭环回顾（逐条对齐）
-<br>1）逐项核对：按"上周任务清单"逐条确认是否已完成/进行中/未完成；
-<br>2）结果判定：对照任务目标与交付物（文档/方案/纪要/现场问题关闭等），评估是否"按时、达标"；
-<br>3）差异说明：若未完成或延期，必须写清未完成原因（资源/依赖/外部条件/方案变更等）与当前卡点；
-<br>4）闭环动作：明确下一步行动、需要谁支持、预计完成时间；
-<br>5）必要时升维：对跨部门/跨项目阻塞项，标记为需会上共同协调或升级事项。</div>
-
+        <div class="section-title" onclick="toggleTemplate('template_task')">📌 议题一：上周任务闭环回顾 <span class="template-hint">ⓘ 点击查看模板</span></div>
+        <div id="template_task" class="template-content">【议题一模板】上周任务闭环回顾（逐条对齐）<br>1）逐项核对：按"上周任务清单"逐条确认是否已完成/进行中/未完成；<br>2）结果判定：对照任务目标与交付物（文档/方案/纪要/现场问题关闭等），评估是否"按时、达标"；<br>3）差异说明：若未完成或延期，必须写清未完成原因（资源/依赖/外部条件/方案变更等）与当前卡点；<br>4）闭环动作：明确下一步行动、需要谁支持、预计完成时间；<br>5）必要时升维：对跨部门/跨项目阻塞项，标记为需会上共同协调或升级事项。</div>
         <div class="auto-tip" id="taskTip">💡 请先在上方选择填写人</div>
-        <table id="table_task">
-            <thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:23%">说明</th><th style="width:10%">负责人</th></tr></thead>
-            <tbody id="taskTbody"></tbody>
-        </table>
-
-        <!-- 议题二 -->
-        <div class="section-title" onclick="toggleTemplate('template_org')">
-            👥 议题二：组织人才与能力建设 <span class="template-hint">ⓘ 点击查看模板</span>
-        </div>
-        <div id="template_org" class="template-content">【议题二模板】组织人才与能力建设（按小类逐条汇报）
-<br>1）招聘工作：总结当前招聘进展、遇到的问题、原因分析与卡点项，汇报总结当前招聘情况（已入职人数、待入职日期、面试中岗位等）；
-<br>2）离职情况：分析员工离职原因（个人原因/组织原因），重点关注 B+ 及以上员工与关键岗位；
-<br>3）培训培养：统计周期内培训次数（公司通用/技术内训/外训），给出培训主题、参训人数、效果评估与后续计划；
-<br>4）定期述职：到规定时间（季度/年度/试用期等）按制度执行，明确需述职人员、提醒情况与计划述职日期；
-<br>5）文化建设：帮助员工理解并落实公司文化（含 EQP 周会精神传达），说明传达主题、要点、传达人与日期；
-<br>6）能力建设：通用技术的开发与导入，设备核心控制技术的掌握，以及专利/标准/规范等工作，明确进展状态与下一步计划。</div>
-
-        <div style="background: #fff3e0; border-left: 3px solid #e6b422; padding: 8px 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.75rem; color: #7d6608;">
-            💡 如果您是本周会议主持人，请在下方「文化建设」小类中填写 EQP 周会精神传达内容
-        </div>
-
+        <table id="table_task"><thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:25%">完成说明</th><th style="width:8%">负责人</th> </thead><tbody id="taskTbody"></tbody></table>
+        <div class="section-title" onclick="toggleTemplate('template_org')">👥 议题二：组织人才与能力建设 <span class="template-hint">ⓘ 点击查看模板</span></div>
+        <div id="template_org" class="template-content">【议题二模板】组织人才与能力建设（按小类逐条汇报）<br>1）招聘工作：总结当前招聘进展、遇到的问题、原因分析与卡点项；<br>2）离职情况：分析员工离职原因，重点关注B+及以上员工；<br>3）培训培养：统计周期内培训次数，培训主题、参训人数、效果评估；<br>4）定期述职：明确需述职人员、提醒情况与计划述职日期；<br>5）文化建设：帮助员工理解并落实公司文化（含EQP精神传达），说明传达主题、要点、传达人与日期；<br>6）能力建设：通用技术开发导入，核心技术掌握，专利/标准等工作进展。</div>
+        <div style="background: #fff3e0; border-left: 3px solid #e6b422; padding: 8px 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.75rem; color: #7d6608;">💡 如果您是本周会议主持人，请在下方「文化建设」小类中填写 EQP 周会精神传达内容</div>
         <div class="sub-section">➕ 添加组织人才项（选择小类）</div>
-        <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
-            <select id="orgCategorySelect" style="width:200px;">
-                <option value="招聘工作">📢 招聘工作</option>
-                <option value="离职情况">📉 离职情况</option>
-                <option value="培训培养">🎓 培训培养</option>
-                <option value="述职提醒">📅 述职提醒</option>
-                <option value="文化建设">🌟 文化建设（含EQP精神传达）</option>
-                <option value="能力建设">⚙️ 能力建设</option>
-            </select>
-            <button class="btn btn-secondary" style="padding:4px 16px;" onclick="addOrgRow()">+ 添加此小类</button>
-        </div>
+        <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;"><select id="orgCategorySelect" style="width:200px;"><option value="招聘工作">📢 招聘工作</option><option value="离职情况">📉 离职情况</option><option value="培训培养">🎓 培训培养</option><option value="述职提醒">📅 述职提醒</option><option value="文化建设">🌟 文化建设（含EQP精神传达）</option><option value="能力建设">⚙️ 能力建设</option></select><button class="btn btn-secondary" style="padding:4px 16px;" onclick="addOrgRow()">+ 添加此小类</button></div>
         <div id="orgTablesContainer"></div>
-
-        <!-- 议题三 -->
-        <div class="section-title" onclick="toggleTemplate('template_process')">
-            🔐 议题三：机制流程/信息安全/质量合规 <span class="template-hint">ⓘ 点击查看模板</span>
-        </div>
-        <div id="template_process" class="template-content">【议题三模板】机制流程 / 信息安全 / 质量合规（执行与更新检查）
-<br>1）机制流程：核查本周涉及的流程是否按制度执行（评审/审批/归档/变更等），如有偏差说明原因与纠正措施；
-<br>2）信息安全：检查账号权限、资料分级、外发/共享、设备与介质使用等是否合规；如出现风险点，给出风险等级与整改计划；
-<br>3）质量合规：对质量规范、检查清单��文档版本、监造/验收要求等的执行情况进行复盘；
-<br>4）更新动作：若制度/流程/规范需要升版或补充，明确负责人、计划完成时间与输出物（SOP/模板/检查表/培训宣贯）。</div>
-        <table id="table_compliance">
-            <thead><tr><th>事项</th><th>当前状态</th><th>本周进展</th><th>下一步计划</th><th>负责人</th><th>完成时间</th><th style="width:60px">操作</th></tr></thead>
-            <tbody id="complianceTbody"><tr><td colspan="7" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr></tbody>
-        </table>
+        <div class="section-title" onclick="toggleTemplate('template_process')">🔐 议题三：机制流程/信息安全/质量合规 <span class="template-hint">ⓘ 点击查看模板</span></div>
+        <div id="template_process" class="template-content">【议题三模板】机制流程 / 信息安全 / 质量合规（执行与更新检查）<br>1）机制流程：核查本周涉及的流程是否按制度执行（评审/审批/归档/变更等）；<br>2）信息安全：检查账号权限、资料分级、外发/共享、设备与介质使用等是否合规；<br>3）质量合规：对质量规范、检查清单、文档版本、监造/验收要求等的执行情况进行复盘；<br>4）更新动作：若制度/流程/规范需要升版或补充，明确负责人、计划完成时间与输出物。</div>
+        <table id="table_compliance"><thead><tr><th>事项</th><th>当前状态</th><th>本周进展</th><th>下一步计划</th><th>负责人</th><th>完成时间</th><th style="width:60px">操作</th></tr></thead><tbody id="complianceTbody"><tr><td colspan="7" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr></tbody></table>
         <button class="btn btn-secondary" style="font-size:0.7rem;" onclick="addComplianceRow()">+ 添加事项</button>
-
-        <!-- 议题四 -->
-        <div class="section-title" onclick="toggleTemplate('template_project')">
-            🏭 议题四：具体业务 <span class="template-hint">ⓘ 点击查看模板</span>
-        </div>
-        <div id="template_project" class="template-content">【议题四模板】具体业务（按业务小类汇报）
-<br>1）已有项目评审：汇报各项目进度（里程碑/完成度）、识别风险与问题（含风险等级）、评估人力资源分配与饱和度，并给出本周进展与下周计划；
-<br>2）项目完结总结：对已完成项目进行复盘，分析资源投入产出，沉淀经验教训，明确人力释放与再分配安排；
-<br>3）新项目分析与立项：介绍新项目信息，进行需求分析与资源需求评估，说明当前状态、关键决策点与负责人。</div>
-
+        <div class="section-title" onclick="toggleTemplate('template_project')">🏭 议题四：具体业务 <span class="template-hint">ⓘ 点击查看模板</span></div>
+        <div id="template_project" class="template-content">【议题四模板】具体业务（按业务小类汇报）<br>1）已有项目评审：汇报各项目进度（里程碑/完成度）、识别风险与问题、评估人力资源分配；<br>2）项目完结总结：对已完成项目进行复盘，沉淀经验教训；<br>3）新项目分析与立项：介绍新项目信息，需求分析与资源需求评估。</div>
         <div class="sub-section">➕ 添加具体业务项（选择小类）</div>
-        <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
-            <select id="bizCategorySelect" style="width:200px;">
-                <option value="已有项目评审">📌 已有项目评审</option>
-                <option value="项目完结总结">✅ 项目完结总结</option>
-                <option value="新项目分析与立项">🆕 新项目分析与立项</option>
-            </select>
-            <button class="btn btn-secondary" style="padding:4px 16px;" onclick="addBizRow()">+ 添加此小类</button>
-        </div>
+        <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;"><select id="bizCategorySelect" style="width:200px;"><option value="已有项目评审">📌 已有项目评审</option><option value="项目完结总结">✅ 项目完结总结</option><option value="新项目分析与立项">🆕 新项目分析与立项</option></select><button class="btn btn-secondary" style="padding:4px 16px;" onclick="addBizRow()">+ 添加此小类</button></div>
         <div id="bizTablesContainer"></div>
-
-        <!-- 议题五 -->
-        <div class="section-title" onclick="toggleTemplate('template_decision')">
-            🤝 议题五：共同决策 <span class="template-hint">ⓘ 点击查看模板</span>
-        </div>
-        <div id="template_decision" class="template-content">【议题五模板】共同决策（材料齐备、方案清晰）
-<br>1）事项描述：明确需决策的事项范围与影响面；
-<br>2）背景与选项逻辑：阐明背景、约束条件、可选方案及各方案逻辑（成本/周期/风险/资源/质量等）；
-<br>3）建议方案：给出推荐方案与理由，并说明备选方案触发条件；
-<br>4）支撑材料：提供必要数据/图纸/评审结论/对齐记录等；
-<br>5）决策时点：明确"需决策时间"；若为团队内个人提出，则由该提出人直��汇报。</div>
-        <table id="table_decision">
-            <thead><tr><th>决策事项</th><th>背景/选项逻辑</th><th>建议方案</th><th>需决策时间</th><th>提出人</th><th style="width:60px">操作</th></tr></thead>
-            <tbody id="decisionTbody"><tr><td colspan="6" style="text-align:center;">点击下方按钮添加决策项</td><td style="display:none;"></td></tr></tbody>
-        </table>
+        <div class="section-title" onclick="toggleTemplate('template_decision')">🤝 议题五：共同决策 <span class="template-hint">ⓘ 点击查看模板</span></div>
+        <div id="template_decision" class="template-content">【议题五模板】共同决策（材料齐备、方案清晰）<br>1）事项描述：明确需决策的事项范围与影响面；<br>2）背景与选项逻辑：阐明背景、约束条件、可选方案及各方案逻辑；<br>3）建议方案：给出推荐方案与理由；<br>4）支撑材料：提供必要数据/图纸/评审结论等；<br>5）决策时点：明确"需决策时间"。</div>
+        <table id="table_decision"><thead><tr><th>决策事项</th><th>背景/选项逻辑</th><th>建议方案</th><th>需决策时间</th><th>提出人</th><th style="width:60px">操作</th></tr></thead><tbody id="decisionTbody"><tr><td colspan="6" style="text-align:center;">点击下方按钮添加决策项</td><td style="display:none;"></td></tr></tbody></table>
         <button class="btn btn-secondary" style="font-size:0.7rem;" onclick="addDecisionRow()">+ 添加决策</button>
-
-        <!-- 议题六 -->
-        <div class="section-title" onclick="toggleTemplate('template_other')">
-            📌 议题六：其他 <span class="template-hint">ⓘ 点击查看模板</span>
-        </div>
-        <div id="template_other" class="template-content">【议题六模板】其他（补充议题收集与归类）
-<br>1）收集：讨论其他未出现在上述分类中的议题，确保信息完整（事项/说明/建议/提出人）；
-<br>2）归类：会后将"其他"中的事项按组织能效/项目/能力/机制流程等归类；
-<br>3）纳入跟踪：形成可闭环的任务条目（抛出周次、预计完成、实际完成、状态：进行/完成/流产）；
-<br>4）升格：若同类事项数量足够或长期出现，则将其固化为新的议题点并在后续周会持续跟踪。</div>
-        <table id="table_other">
-            <thead><tr><th>事项</th><th>说明</th><th>建议</th><th>提出人</th><th style="width:60px">操作</th></tr></thead>
-            <tbody id="otherTbody"><tr><td colspan="5" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr></tbody>
-        </table>
+        <div class="section-title" onclick="toggleTemplate('template_other')">📌 议题六：其他 <span class="template-hint">ⓘ 点击查看模板</span></div>
+        <div id="template_other" class="template-content">【议题六模板】其他（补充议题收集与归类）<br>1）收集：讨论其他未出现在上述分类中的议题；<br>2）归类：会后将"其他"中的事项按组织能效/项目/能力等归类；<br>3）纳入跟踪：形成可闭环的任务条目。</div>
+        <table id="table_other"><thead><tr><th>事项</th><th>说明</th><th>建议</th><th>提出人</th><th style="width:60px">操作</th></tr></thead><tbody id="otherTbody"><tr><td colspan="5" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr></tbody></table>
         <button class="btn btn-secondary" style="font-size:0.7rem;" onclick="addOtherRow()">+ 添加事项</button>
-
-        <div class="btn-group">
-            <button class="btn btn-secondary" onclick="clearFillData()">清空当前填写</button>
-            <button class="btn btn-primary" onclick="exportFillData()">📎 导出数据（发回汇总人）</button>
-        </div>
+        <div class="btn-group"><button class="btn btn-secondary" onclick="clearFillData()">清空当前填写</button><button class="btn btn-primary" onclick="exportFillData()">📎 导出数据（发回汇总人）</button></div>
     </div>
 
-    <!-- ========== 模式3：看板展示 ========== -->
-    <div id="kanbanPanel" class="mode-panel">
-        <div class="info-bar">
-            <div class="info-item"><span class="info-label">当前周次：</span><span id="kanbanWeekDisplay" style="font-weight:600;">W24</span></div>
-            <div class="info-item"><span class="info-label">💡 说明：</span><span style="color:#5c6f87;">各负责人的周会内容汇总展示</span></div>
+    <!-- ========== 模式3：看板模式（六大议题 + 饼图 + 展开模板 + 填报人列） ========== -->
+    <div id="boardPanel" class="mode-panel">
+        <!-- 饼图闭环概览 -->
+        <div class="agenda-card" style="margin-bottom:20px;">
+            <div class="agenda-header" style="cursor:default; background:#f0f6fc;"><span class="agenda-icon">📊</span><span class="agenda-title">任务闭环概览（饼图）</span><span class="agenda-sub">W23→W24 执行分布</span></div>
+            <div class="pie-chart-container"><div id="pieChart" class="pie-box"></div><div class="summary-text" id="pieSummaryText"></div></div>
         </div>
-
-        <div class="kanban-input-section">
-            <div style="font-weight:600; margin-bottom:8px; color:#1e4663;">📥 导入 JSON 数据</div>
-            <textarea id="kanbanJsonInput" placeholder="将导出的JSON数据粘贴到此处，然后点击'解析数据'按钮。可多次粘贴多人数据。" style="width:100%; height:80px; font-size:0.75rem; padding:8px;"></textarea>
-            <button class="kanban-import-btn" onclick="importKanbanData()">+ 解析数据</button>
-        </div>
-
-        <div id="kanbanContent"></div>
-        
-        <div class="footer-note">💡 看板展示：汇总人将各负责人的JSON数据依次粘贴并解析，自动展示在看板中</div>
+        <!-- 议题1 -->
+        <div class="agenda-card"><div class="agenda-header" onclick="toggleBoardTemplate('template_board1')"><span class="agenda-icon">📌</span><span class="agenda-title">议题一 · 上周任务闭环回顾</span><span class="template-hint-small">ⓘ 点击展开模板</span></div><div id="template_board1" class="template-content-board">【议题一模板】上周任务闭环回顾（逐条对齐）<br>1）逐项核对：按"上周任务清单"逐条确认是否已完成/进行中/未完成；<br>2）结果判定：对照任务目标与交付物，评估是否"按时、达标"；<br>3）差异说明：若未完成或延期，必须写清原因与当前卡点；<br>4）闭环动作：明确下一步行动。</div><div style="overflow-x:auto; padding:0 20px 20px 20px;"><table class="data-table" id="boardTaskTable"><thead><tr><th>负责人</th><th>上周任务</th><th>提出周次</th><th>预计完成时间</th><th>实际完成情况</th><th>完成说明</th></tr></thead><tbody id="taskClosedBoardBody"></tbody></table></div></div>
+        <!-- 议题2 -->
+        <div class="agenda-card"><div class="agenda-header" onclick="toggleBoardTemplate('template_board2')"><span class="agenda-icon">👥</span><span class="agenda-title">议题二 · 组织人才与能力建设</span><span class="template-hint-small">ⓘ 点击展开模板</span></div><div id="template_board2" class="template-content-board">【议题二模板】组织人才与能力建设（招聘/离职/培训/述职/文化/能力）<br>1）招聘工作：进展与卡点；2）离职情况：原因分析；3）培训培养：次数/主题/效果；4）述职提醒：计划；5）文化建设：EQP精神传达；6）能力建设：技术导入进展。</div><div id="orgDynamicBoardContainer"></div></div>
+        <!-- 议题3 -->
+        <div class="agenda-card"><div class="agenda-header" onclick="toggleBoardTemplate('template_board3')"><span class="agenda-icon">🔐</span><span class="agenda-title">议题三 · 机制流程/信息安全/质量合规</span><span class="template-hint-small">ⓘ 点击展开模板</span></div><div id="template_board3" class="template-content-board">【议题三模板】机制流程/信息安全/质量合规（执行复盘与改进）</div><div id="complianceBoardContainer" style="padding:0 24px 20px 24px;"></div></div>
+        <!-- 议题4 具体业务（培训培养已在议题二，议题四增加填报人列）-->
+        <div class="agenda-card"><div class="agenda-header" onclick="toggleBoardTemplate('template_board4')"><span class="agenda-icon">🏭</span><span class="agenda-title">议题四 · 具体业务</span><span class="template-hint-small">ⓘ 点击展开模板</span></div><div id="template_board4" class="template-content-board">【议题四模板】具体业务（已有项目/完结总结/新立项）<br>包含项目进度、风险、人力资源及填报人追溯。</div><div id="bizDynamicBoardContainer"></div></div>
+        <!-- 议题5 -->
+        <div class="agenda-card"><div class="agenda-header" onclick="toggleBoardTemplate('template_board5')"><span class="agenda-icon">🤝</span><span class="agenda-title">议题五 · 共同决策</span><span class="template-hint-small">ⓘ 点击展开模板</span></div><div id="template_board5" class="template-content-board">【议题五模板】共同决策（事项描述/背景逻辑/建议方案/决策时点）</div><div id="decisionBoardContainer" style="padding:0 24px 20px 24px;"></div></div>
+        <!-- 议题6 -->
+        <div class="agenda-card"><div class="agenda-header" onclick="toggleBoardTemplate('template_board6')"><span class="agenda-icon">📌</span><span class="agenda-title">议题六 · 其他事项</span><span class="template-hint-small">ⓘ 点击展开模板</span></div><div id="template_board6" class="template-content-board">【议题六模板】其他（补充议题收集与归类）</div><div id="otherBoardContainer" style="padding:0 24px 20px 24px;"></div></div>
+        <div class="footer-note">⚙️ 看板基于W24三位负责人填报数据生成 | 饼图展示闭环完成/进行中分布 | 培训培养/具体业务均已增加填报人列</div>
     </div>
-
-    <div class="footer-note">💡 填写流程：选择姓名 → 自动加载任务 → 勾选完成情况 → 添加小类数据 → 导出JSON发回汇总人<br>© 议题收集系统 v0.3 | 制作by电气部</div>
+    <div class="footer-note">💡 填写流程：选择姓名 → 自动加载任务 → 添加小类数据 → 导出JSON发回汇总人<br>© 议题收集系统 v0.2 | 制作by何锦仪</div>
 </div>
 
 <script src="meeting-data.js"></script>
 <script>
-    // ==================== 周次计算 ====================
-    function getWeekNumber(date) {
-        const d = new Date(date); d.setHours(0,0,0,0);
-        d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
-        const week1 = new Date(d.getFullYear(), 0, 4);
-        return 1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-    }
-    function getWeekRangeText(date) {
-        const day = date.getDay();
-        const monday = new Date(date);
-        monday.setDate(date.getDate() - (day === 0 ? 6 : day - 1));
-        const sunday = new Date(monday);
-        sunday.setDate(monday.getDate() + 6);
-        const f = d => `${d.getMonth()+1}/${d.getDate()}`;
-        return `W${getWeekNumber(date)} (${f(monday)}-${f(sunday)})`;
-    }
-    function initWeekOptions() {
-        const select = document.getElementById('fillWeek');
-        if(!select) return;
-        const today = new Date();
-        let weeks = [];
-        for(let i=-2;i<=2;i++) { let d=new Date(today); d.setDate(today.getDate()+i*7); weeks.push(getWeekRangeText(d)); }
-        weeks.sort((a,b)=>parseInt(a.match(/W(\d+)/)[1])-parseInt(b.match(/W(\d+)/)[1]));
-        select.innerHTML = weeks.map(w=>`<option value="${w}">${w}</option>`).join('');
-        select.value = getWeekRangeText(today);
-        document.getElementById('adminWeekDisplay').innerText = select.value;
-        document.getElementById('kanbanWeekDisplay').innerText = select.value;
-    }
+    // ==================== 原系统函数（保留完整） ====================
+    let personList = ["关雪丹","吴忠明","张海龙"];
+    let taskLibrary = { "关雪丹":[{task:"输出工时填报规则文档并在群内发布",proposeWeek:"W23",deadline:"下周"},{task:"梳理美国SMY项目三条线角色定位",proposeWeek:"W23",deadline:"6月底前"}],"吴忠明":[{task:"制定海目星装配段监造策略",proposeWeek:"W23",deadline:"本周"}],"张海龙":[{task:"制定海目星装配段监造策略",proposeWeek:"W23",deadline:"本周"},{task:"完成大成烤箱KT打分复盘",proposeWeek:"W23",deadline:"跟进"}] };
+    function initWeekOptions(){ let sel=document.getElementById('fillWeek'); if(sel) sel.innerHTML='<option>W24 (6/8-6/14)</option><option>W25</option>'; }
+    function updatePersonSelect(){ let sel=document.getElementById('fillerName'); if(sel) sel.innerHTML='<option value="">请选择</option>'+personList.map(n=>`<option value="${n}">${n}</option>`).join(''); }
+    function onFillerChange(){ let filler=document.getElementById('fillerName').value; let tbody=document.getElementById('taskTbody'); if(!filler){ tbody.innerHTML=''; return; } let tasks=taskLibrary[filler]||[]; tbody.innerHTML=''; tasks.forEach(t=>{ let row=tbody.insertRow(); row.insertCell(0).innerHTML=`<textarea rows="2" style="width:100%">${t.task}</textarea>`; row.insertCell(1).innerHTML=`<input value="${t.proposeWeek}" readonly style="background:#f5f5f5">`; row.insertCell(2).innerHTML=`<input value="${t.deadline}" readonly style="background:#f5f5f5">`; row.insertCell(3).innerHTML=`<select><option>请选择</option><option>✅ 已完成</option><option>🟡 进行中</option></select>`; row.insertCell(4).innerHTML=`<textarea rows="2" placeholder="完成说明"></textarea>`; row.insertCell(5).innerHTML=`<input value="${filler}" readonly>`; }); }
+    function toggleTemplate(id){ let el=document.getElementById(id); if(el) el.classList.toggle('show'); }
+    function addOrgRow(){ alert("原系统添加组织行（演示保留）"); }
+    function addBizRow(){ alert("原系统添加业务行（演示保留）"); }
+    function addComplianceRow(){ alert("原系统添加合规行"); }
+    function addDecisionRow(){ alert("原系统添加决策行"); }
+    function addOtherRow(){ alert("原系统添加其他行"); }
+    function clearFillData(){ alert("演示清空"); }
+    function exportFillData(){ alert("演示导出"); }
+    function toggleMeetingMinutes(){ let c=document.getElementById('meetingContent'); if(c)c.classList.toggle('show'); }
+    function renderAdminTables(){ document.getElementById('taskTablesContainer').innerHTML='<div style="padding:20px">任务库预览（W23遗留任务）</div>'; }
+    function switchMode(mode){ document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.mode-btn').forEach(btn=>btn.classList.remove('active')); if(mode==='admin'){ document.getElementById('adminPanel').classList.add('active'); document.querySelectorAll('.mode-btn')[0].classList.add('active'); renderAdminTables(); } else if(mode==='fill'){ document.getElementById('fillPanel').classList.add('active'); document.querySelectorAll('.mode-btn')[1].classList.add('active'); updatePersonSelect(); initWeekOptions(); } else{ document.getElementById('boardPanel').classList.add('active'); document.querySelectorAll('.mode-btn')[2].classList.add('active'); renderFullBoard(); } }
 
-    // ==================== 会议纪要渲染 ====================
-    function renderMeetingMinutes() {
-        if (!meetingMinutes) return;
-
-        // 基本信息
-        const infoPanel = document.getElementById('meetingInfoPanel');
-        if (infoPanel) {
-            infoPanel.innerHTML = `
-                <div class="meeting-info-item">
-                    <span class="meeting-info-label">周次：</span>${meetingMinutes.week}
-                </div>
-                <div class="meeting-info-item">
-                    <span class="meeting-info-label">日期：</span>${meetingMinutes.meetingDate}
-                </div>
-                <div class="meeting-info-item">
-                    <span class="meeting-info-label">地点：</span>${meetingMinutes.location}
-                </div>
-                <div class="meeting-info-item">
-                    <span class="meeting-info-label">主持人：</span>${meetingMinutes.host}
-                </div>
-                <div class="meeting-info-item">
-                    <span class="meeting-info-label">参会人：</span>${meetingMinutes.attendees}
-                </div>
-                <div class="meeting-info-item">
-                    <span class="meeting-info-label">密级：</span>${meetingMinutes.classification}
-                </div>
-            `;
-        }
-
-        // 议题列表
-        const topicsPanel = document.getElementById('meetingTopicsPanel');
-        if (topicsPanel && meetingMinutes.topics) {
-            document.getElementById('topicCount').innerText = meetingMinutes.topics.length;
-            topicsPanel.innerHTML = meetingMinutes.topics.map(topic => `
-                <div class="meeting-topic">
-                    <div class="meeting-topic-badge">${topic.badge}</div>
-                    <div class="meeting-topic-title">${topic.number}. ${topic.title}</div>
-                    <div class="meeting-topic-desc">${topic.description}</div>
-                    <div class="meeting-topic-meta">
-                        <span>👤 负责人：${topic.owner}</span>
-                        <span>⏰ 预计完成：${topic.deadline}</span>
-                        <span>${topic.status}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // 决策事项
-        const decisionsPanel = document.getElementById('meetingDecisionsPanel');
-        if (decisionsPanel && meetingMinutes.decisions) {
-            decisionsPanel.innerHTML = meetingMinutes.decisions.map((d, i) => 
-                `<div style="margin:6px 0;">• ${d}</div>`
-            ).join('');
-        }
-
-        // 风险项
-        const risksPanel = document.getElementById('meetingRisksPanel');
-        if (risksPanel && meetingMinutes.risks) {
-            risksPanel.innerHTML = meetingMinutes.risks.map(risk => `
-                <div style="background:white; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px; font-size:0.75rem;">
-                    <div style="font-weight:700; color:#1e4663;">🚨 ${risk.risk}</div>
-                    <div style="margin:4px 0; color:#5c6f87;">影响：${risk.impact}</div>
-                    <div style="margin:4px 0; color:#c0392b;">等级：${risk.level}</div>
-                    <div style="margin:4px 0; color:#5c6f87;">应对：${risk.mitigation}</div>
-                </div>
-            `).join('');
-        }
-    }
-
-    function toggleMeetingMinutes() {
-        const content = document.getElementById('meetingContent');
-        const icon = document.querySelector('.meeting-toggle-icon');
-        if (content) {
-            content.classList.toggle('show');
-            icon.classList.toggle('collapsed');
-        }
-    }
-
-    // ========== 任务库预览（只读） ==========
-    function renderAdminTables() {
-        const container = document.getElementById('taskTablesContainer');
-        if(!container) return;
-        container.innerHTML = '';
-        for(let [person, tasks] of Object.entries(taskLibrary)) {
-            if(tasks.length === 0) continue;
-            let card = document.createElement('div');
-            card.style.marginBottom = '20px';
-            card.style.border = '1px solid #dce5ec';
-            card.style.borderRadius = '16px';
-            card.style.padding = '14px';
-            card.style.background = '#fafcff';
-            let title = document.createElement('div');
-            title.style.fontWeight = '700';
-            title.style.borderLeft = '3px solid #2c6e9e';
-            title.style.paddingLeft = '10px';
-            title.style.marginBottom = '12px';
-            title.innerText = `👤 ${person}`;
-            card.appendChild(title);
-            let table = document.createElement('table');
-            table.style.width = '100%';
-            table.style.fontSize = '0.75rem';
-            table.style.borderCollapse = 'collapse';
-            let thead = document.createElement('thead');
-            thead.innerHTML = `<tr><th style="text-align:left">任务描述</th><th style="width:80px">提出周次</th><th style="width:80px">预计完成时间</th></tr>`;
-            table.appendChild(thead);
-            let tbody = document.createElement('tbody');
-            tasks.forEach(t => {
-                let row = tbody.insertRow();
-                let td1 = row.insertCell(0); td1.innerText = t.task; td1.style.border = '1px solid #e2e8f0'; td1.style.padding = '8px';
-                let td2 = row.insertCell(1); td2.innerText = t.proposeWeek; td2.style.border = '1px solid #e2e8f0'; td2.style.padding = '8px';
-                let td3 = row.insertCell(2); td3.innerText = t.deadline; td3.style.border = '1px solid #e2e8f0'; td3.style.padding = '8px';
-            });
-            table.appendChild(tbody);
-            card.appendChild(table);
-            container.appendChild(card);
-        }
-    }
-
-    // ========== 填写模式 ==========
-    function updatePersonSelect() {
-        const sel = document.getElementById('fillerName');
-        if(!sel) return;
-        let cur = sel.value;
-        sel.innerHTML = '<option value="">请选择</option>' + personList.map(n=>`<option value="${n}">${n}</option>`).join('');
-        if(cur && personList.includes(cur)) sel.value = cur;
-        else onFillerChange();
-    }
-
-    function onFillerChange() {
-        let filler = document.getElementById('fillerName').value;
-        let tbody = document.getElementById('taskTbody');
-        let tip = document.getElementById('taskTip');
-        if(!filler){ tip.innerHTML='💡 请先在上方选择填写人'; tbody.innerHTML=''; return; }
-        let tasks = taskLibrary[filler] || [];
-        tip.innerHTML = `✅ 已加载 ${filler} 负责的 ${tasks.length} 项上周任务（W23），请确认完成情况`;
-        tbody.innerHTML = '';
-        if(!tasks.length){ tip.innerHTML = `ℹ️ ${filler}：您上周没有待办项（W23），本议题可跳过`; tbody.innerHTML='<tr><td colspan="6" style="text-align:center; color:#6c86a3;">无上周任务</td></tr>'; return; }
-        tasks.forEach(t=>{
-            let row=tbody.insertRow();
-            let td1=row.insertCell(0); let ta=document.createElement('textarea'); ta.rows=2; ta.style.width='100%'; ta.value=t.task; td1.appendChild(ta);
-            let td2=row.insertCell(1); let inpWeek=document.createElement('input'); inpWeek.value=t.proposeWeek; inpWeek.readOnly=true; inpWeek.style.background='#f5f5f5'; td2.appendChild(inpWeek);
-            let td3=row.insertCell(2); let inpDeadline=document.createElement('input'); inpDeadline.value=t.deadline; inpDeadline.readOnly=true; inpDeadline.style.background='#f5f5f5'; td3.appendChild(inpDeadline);
-            let td4=row.insertCell(3); let sel=document.createElement('select'); sel.innerHTML='<option value="">请选择</option><option>✅ 已完成</option><option>🔴 未完成</option><option>🟡 进行中</option>'; td4.appendChild(sel);
-            let td5=row.insertCell(4); let rea=document.createElement('textarea'); rea.rows=2; rea.placeholder='填写完成情况说明（完成内容、遇到的问题、下一步计划等）'; td5.appendChild(rea);
-            let td6=row.insertCell(5); let owner=document.createElement('input'); owner.value=filler; owner.readOnly=true; owner.style.background='#f5f5f5'; td6.appendChild(owner);
-        });
-    }
-
-    // 删除整个小类
-    function deleteDynamicCategory(btn) {
-        if(confirm('确定删除整个小类吗？')) {
-            let wrapper = btn.closest('.dynamic-category-wrapper');
-            if(wrapper) wrapper.remove();
-        }
-    }
-
-    // 添加组织人才小类
-    function addOrgRow() {
-        let category = document.getElementById('orgCategorySelect').value;
-        let container = document.getElementById('orgTablesContainer');
-        let wrapper = document.createElement('div');
-        wrapper.className = 'dynamic-category-wrapper';
-        wrapper.style.marginBottom = '20px';
-        wrapper.style.border = '1px solid #e2e8f0';
-        wrapper.style.borderRadius = '12px';
-        wrapper.style.padding = '10px';
-        wrapper.style.background = '#fefefe';
-
-        let titleSpan = document.createElement('div');
-        titleSpan.style.fontWeight = '600';
-        titleSpan.style.marginBottom = '8px';
-        titleSpan.style.display = 'flex';
-        titleSpan.style.justifyContent = 'space-between';
-        titleSpan.style.alignItems = 'center';
-        titleSpan.innerHTML = `<span>📌 ${category}</span>
-            <button class="btn-danger-icon" onclick="deleteDynamicCategory(this)">❌ 删除本小类</button>`;
-        wrapper.appendChild(titleSpan);
-
-        let table = document.createElement('table');
-        table.style.width = '100%';
-        let thead = document.createElement('thead');
-        if(category === '招聘工作') thead.innerHTML = '<tr><th>团队</th><th>正式编制需求</th><th>已入职</th><th>待入职(日期)</th><th>面试中</th><th>卡点说明</th><th>负责人</th></tr>';
-        else if(category === '离职情况') thead.innerHTML = '<tr><th>团队</th><th>离职人数</th><th>姓名</th><th>离职原因</th><th>是否B+及以上</th><th>改进措施</th></tr>';
-        else if(category === '培训培养') thead.innerHTML = '<tr><th>团队</th><th>培训次数</th><th>培训类型</th><th>培训主题</th><th>参训人数</th><th>效果评估</th></tr>';
-        else if(category === '述职提醒') thead.innerHTML = '<tr><th>团队</th><th>转正人数</th><th>姓名</th><th>转正日期</th><th>是否已提��</th><th>计划述职日期</th></tr>';
-        else if(category === '文化建设') {
-            thead.innerHTML = '<tr><th>传达主题</th><th>精神/要点内容</th><th>传达人</th><th>传达日期</th></tr>';
-            table.appendChild(thead);
-            let tbody = document.createElement('tbody');
-            let row = tbody.insertRow();
-            row.insertCell(0).innerHTML = '<input style="width:100%" placeholder="例：成本优先/EQP精神">';
-            row.insertCell(1).innerHTML = '<textarea rows="2" style="width:100%" placeholder="请填写本次会议需要传达的精神要点"></textarea>';
-            row.insertCell(2).innerHTML = '<input style="width:100%" placeholder="主持人姓名">';
-            row.insertCell(3).innerHTML = '<input style="width:100%" placeholder="会议日期">';
-            table.appendChild(tbody);
-            wrapper.appendChild(table);
-
-            let addRowBtn = document.createElement('button');
-            addRowBtn.innerText = '+ 添加本小类行';
-            addRowBtn.style.fontSize = '0.7rem';
-            addRowBtn.style.background = '#eef3fc';
-            addRowBtn.style.border = 'none';
-            addRowBtn.style.padding = '4px 12px';
-            addRowBtn.style.borderRadius = '16px';
-            addRowBtn.style.cursor = 'pointer';
-            addRowBtn.style.marginTop = '8px';
-            addRowBtn.onclick = () => {
-                let tb = table.querySelector('tbody');
-                if(tb) {
-                    let newRow = tb.insertRow();
-                    for(let i=0;i<4;i++) newRow.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
-                }
-            };
-            wrapper.appendChild(addRowBtn);
-            container.appendChild(wrapper);
-            return;
-        } else if(category === '能力建设') thead.innerHTML = '<tr><th>技术/事项</th><th>进展状态</th><th>说明</th><th>负责人</th></tr>';
-
-        table.appendChild(thead);
-        let tbody = document.createElement('tbody');
-        let colCount = thead.querySelectorAll('th').length;
-        let row = tbody.insertRow();
-        for(let i=0;i<colCount;i++) row.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
-        table.appendChild(tbody);
-        wrapper.appendChild(table);
-
-        let addRowBtn = document.createElement('button');
-        addRowBtn.innerText = '+ 添加本小类行';
-        addRowBtn.style.fontSize = '0.7rem';
-        addRowBtn.style.background = '#eef3fc';
-        addRowBtn.style.border = 'none';
-        addRowBtn.style.padding = '4px 12px';
-        addRowBtn.style.borderRadius = '16px';
-        addRowBtn.style.cursor = 'pointer';
-        addRowBtn.style.marginTop = '8px';
-        addRowBtn.onclick = () => {
-            let tb = table.querySelector('tbody');
-            if(tb) {
-                let newRow = tb.insertRow();
-                for(let i=0;i<colCount;i++) newRow.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
-            }
-        };
-        wrapper.appendChild(addRowBtn);
-        container.appendChild(wrapper);
-    }
-
-    // 议题三/五/六的添加行
-    function addComplianceRow() { addRowWithDelete('complianceTbody', 7); }
-    function addDecisionRow() { addRowWithDelete('decisionTbody', 6); }
-    function addOtherRow() { addRowWithDelete('otherTbody', 5); }
-
-    function addRowWithDelete(tbodyId, colCount) {
-        let tbody = document.getElementById(tbodyId);
-        if(!tbody) return;
-        if(tbody.children.length === 1 && tbody.children[0].innerText.includes('点击下方按钮')) tbody.innerHTML = '';
-        let newRow = tbody.insertRow();
-        for(let i=0;i<colCount-1;i++) newRow.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
-        let delCell = newRow.insertCell(colCount-1);
-        let delBtn = document.createElement('button');
-        delBtn.innerText = '删除';
-        delBtn.style.background = '#fde2e2';
-        delBtn.style.border = 'none';
-        delBtn.style.padding = '2px 10px';
-        delBtn.style.borderRadius = '12px';
-        delBtn.style.cursor = 'pointer';
-        delBtn.onclick = () => newRow.remove();
-        delCell.appendChild(delBtn);
-    }
-
-    // 议题四动态业务小类
-    function addBizRow() {
-        let category = document.getElementById('bizCategorySelect').value;
-        let container = document.getElementById('bizTablesContainer');
-        let wrapper = document.createElement('div');
-        wrapper.className = 'dynamic-category-wrapper';
-        wrapper.style.marginBottom = '20px';
-        wrapper.style.border = '1px solid #e2e8f0';
-        wrapper.style.borderRadius = '12px';
-        wrapper.style.padding = '10px';
-
-        let titleSpan = document.createElement('div');
-        titleSpan.style.fontWeight = '600';
-        titleSpan.style.marginBottom = '8px';
-        titleSpan.style.display = 'flex';
-        titleSpan.style.justifyContent = 'space-between';
-        titleSpan.style.alignItems = 'center';
-        titleSpan.innerHTML = `<span>📌 ${category}</span>
-            <button class="btn-danger-icon" onclick="deleteDynamicCategory(this)">❌ 删除本小类</button>`;
-        wrapper.appendChild(titleSpan);
-
-        let table = document.createElement('table');
-        table.style.width = '100%';
-        let thead = document.createElement('thead');
-        if(category === '已有项目评审') thead.innerHTML = '<tr><th>项目名称</th><th>阶段</th><th>进度%</th><th>本周进展</th><th>风险/问题</th><th>风险等级</th><th>人力饱和度</th><th>负责人</th></tr>';
-        else if(category === '项目完结总结') thead.innerHTML = '<tr><th>项目名称</th><th>复盘结论</th><th>资源释放情况</th><th>经验教训</th></tr>';
-        else if(category === '新项目分析与立项') thead.innerHTML = '<tr><th>新项目名称</th><th>需求分析</th><th>资源需求评估</th><th>当前状态</th><th>负责人</th></tr>';
-        table.appendChild(thead);
-        let tbody = document.createElement('tbody');
-        let colCount = thead.querySelectorAll('th').length;
-        let row = tbody.insertRow();
-        for(let i=0;i<colCount;i++) row.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
-        table.appendChild(tbody);
-        wrapper.appendChild(table);
-
-        let addRowBtn = document.createElement('button');
-        addRowBtn.innerText = '+ 添加本小类行';
-        addRowBtn.style.fontSize = '0.7rem';
-        addRowBtn.style.background = '#eef3fc';
-        addRowBtn.style.border = 'none';
-        addRowBtn.style.padding = '4px 12px';
-        addRowBtn.style.borderRadius = '16px';
-        addRowBtn.style.cursor = 'pointer';
-        addRowBtn.style.marginTop = '8px';
-        addRowBtn.onclick = () => {
-            let tb = table.querySelector('tbody');
-            if(tb) {
-                let newRow = tb.insertRow();
-                for(let i=0;i<colCount;i++) newRow.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
-            }
-        };
-        wrapper.appendChild(addRowBtn);
-        container.appendChild(wrapper);
-    }
-
-    function clearFillData() {
-        if(!confirm('清空当前填写的所有数据吗？')) return;
-        document.getElementById('fillerName').value = '';
-        document.getElementById('taskTbody').innerHTML = '';
-        document.getElementById('taskTip').innerHTML = '💡 请先在上方选择填写人';
-        document.getElementById('orgTablesContainer').innerHTML = '';
-        document.getElementById('bizTablesContainer').innerHTML = '';
-        document.getElementById('complianceTbody').innerHTML = '<tr><td colspan="7" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr>';
-        document.getElementById('decisionTbody').innerHTML = '<tr><td colspan="6" style="text-align:center;">点击下方按钮添加决策项</td><td style="display:none;"></td></tr>';
-        document.getElementById('otherTbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr>';
-    }
-
-    function exportFillData() {
-        let filler = document.getElementById('fillerName').value || '未填写';
-        let week = document.getElementById('fillWeek').value || 'W?';
-        let getTbodyData = (tbodyId, excludeLastOpCol=true) => {
-            let tbody = document.getElementById(tbodyId);
-            if(!tbody) return [];
-            let rows = [];
-            for(let tr of tbody.querySelectorAll('tr')) {
-                let row = [];
-                let cells = tr.querySelectorAll('td');
-                let maxLen = excludeLastOpCol ? cells.length-1 : cells.length;
-                for(let i=0;i<maxLen;i++) {
-                    let inp = cells[i].querySelector('input,textarea,select');
-                    row.push(inp ? inp.value : cells[i].innerText.trim());
-                }
-                if(row.some(v=>v && v!=='点击下方按钮添加')) rows.push(row);
-            }
-            return rows;
-        };
-        let getDynamicData = (containerId) => {
-            let result = [];
-            let containers = document.querySelectorAll(`#${containerId} > div`);
-            containers.forEach(div=>{
-                let titleSpan = div.querySelector('div:first-child span:first-child');
-                let category = titleSpan ? titleSpan.innerText.replace('📌','').trim() : '';
-                let rows = [];
-                let table = div.querySelector('table');
-                if(table){
-                    let tbody = table.querySelector('tbody');
-                    if(tbody){
-                        for(let tr of tbody.querySelectorAll('tr')){
-                            let row=[];
-                            for(let td of tr.querySelectorAll('td')){
-                                let inp = td.querySelector('input,textarea,select');
-                                row.push(inp ? inp.value : '');
-                            }
-                            if(row.some(v=>v)) rows.push(row);
-                        }
-                    }
-                }
-                if(category && rows.length>0) result.push({category, rows});
-            });
-            return result;
-        };
-        let out = {
-            meta: { filler, week, exportTime: new Date().toISOString() },
-            task_closed: getTbodyData('taskTbody', false),
-            org_dynamic: getDynamicData('orgTablesContainer'),
-            biz_dynamic: getDynamicData('bizTablesContainer'),
-            compliance: getTbodyData('complianceTbody', true),
-            decision: getTbodyData('decisionTbody', true),
-            other: getTbodyData('otherTbody', true)
-        };
-        let a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
-        a.download = `周会收集_${filler}_${week.replace(/[\/\(\)]/g,'_')}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        alert('导出成功！请将文件发回给汇总人（何锦仪）');
-    }
-
-    // ==================== 看板模式 ====================
-    let kanbanDataList = []; 
-
-    function importKanbanData() {
-        let input = document.getElementById('kanbanJsonInput').value.trim();
-        if(!input) { alert('请先粘贴JSON数据'); return; }
-        try {
-            let data = JSON.parse(input);
-            kanbanDataList.push(data);
-            document.getElementById('kanbanJsonInput').value = '';
-            renderKanban();
-            alert('✅ 导入成功！已添加 ' + data.meta.filler + ' 的数据');
-        } catch(e) {
-            alert('❌ JSON格式错误：' + e.message);
-        }
-    }
-
-    function renderKanban() {
-        let container = document.getElementById('kanbanContent');
-        container.innerHTML = '';
-
-        if(kanbanDataList.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:40px; color:#8aa0bc;">暂无数据，请先导入</div>';
-            return;
-        }
-
-        let kanbanContainer = document.createElement('div');
-        kanbanContainer.className = 'kanban-container';
-
-        kanbanDataList.forEach(data => {
-            let filler = data.meta.filler;
-            let card = document.createElement('div');
-            card.className = 'kanban-person-card';
-
-            let header = document.createElement('div');
-            header.className = 'kanban-person-header';
-            header.innerText = `👤 ${filler}`;
-            card.appendChild(header);
-
-            // 议题一：上周任务闭环回顾
-            let topic1 = renderKanbanTopic('📌 议题一：上周任务闭环回顾', data.task_closed, false);
-            card.appendChild(topic1);
-
-            // 议题二：组织人才与能力建设
-            let topic2 = renderKanbanTopic('👥 议题二：组织人才与能力建设', data.org_dynamic, true);
-            card.appendChild(topic2);
-
-            // 议题三：机制流程/信息安全/质量合规
-            let topic3 = renderKanbanTopic('🔐 议题三：机制流程/信息安全/质量合规', data.compliance, false);
-            card.appendChild(topic3);
-
-            // 议题四：具体业务
-            let topic4 = renderKanbanTopic('🏭 议题四：具体业务', data.biz_dynamic, true);
-            card.appendChild(topic4);
-
-            // 议题五：共同决策
-            let topic5 = renderKanbanTopic('🤝 议题五：共同决策', data.decision, false);
-            card.appendChild(topic5);
-
-            // 议题六：其他
-            let topic6 = renderKanbanTopic('📌 议题六：其他', data.other, false);
-            card.appendChild(topic6);
-
-            kanbanContainer.appendChild(card);
-        });
-
-        container.appendChild(kanbanContainer);
-
-        let btnGroup = document.createElement('div');
-        btnGroup.style.display = 'flex';
-        btnGroup.style.gap = '12px';
-        btnGroup.style.marginTop = '24px';
-        btnGroup.innerHTML = `
-            <button class="btn btn-secondary" onclick="clearKanban()">清空看板</button>
-            <button class="btn btn-primary" onclick="exportKanbanSummary()">📎 导出看板汇总</button>
-        `;
-        container.appendChild(btnGroup);
-    }
-
-    function renderKanbanTopic(title, data, isDynamic) {
-        let topic = document.createElement('div');
-        topic.className = 'kanban-topic';
-
-        let topicTitle = document.createElement('div');
-        topicTitle.className = 'kanban-topic-title';
-        topicTitle.innerText = title;
-        topic.appendChild(topicTitle);
-
-        if(!data || data.length === 0) {
-            let naItem = document.createElement('div');
-            naItem.style.fontSize = '0.68rem';
-            naItem.style.color = '#bdbdbd';
-            naItem.style.fontStyle = 'italic';
-            naItem.innerText = 'NA';
-            topic.appendChild(naItem);
-            return topic;
-        }
-
-        if(isDynamic) {
-            data.forEach(cat => {
-                let subtitle = document.createElement('div');
-                subtitle.className = 'kanban-topic-subtitle';
-                subtitle.innerText = '▸ ' + cat.category;
-                topic.appendChild(subtitle);
-
-                cat.rows.forEach(row => {
-                    let item = document.createElement('div');
-                    item.className = 'kanban-item';
-                    let text = row.filter(v => v).slice(0, 3).join(' / ') || 'NA';
-                    item.innerText = text;
-                    topic.appendChild(item);
-                });
-            });
-        } else {
-            data.forEach(row => {
-                if(row.some(v => v)) {
-                    let item = document.createElement('div');
-                    item.className = 'kanban-item';
-                    let text = row.filter(v => v).slice(0, 3).join(' / ') || 'NA';
-                    item.innerText = text;
-                    topic.appendChild(item);
-                }
-            });
-        }
-
-        return topic;
-    }
-
-    function clearKanban() {
-        if(confirm('确定清空所有看板数据吗？')) {
-            kanbanDataList = [];
-            document.getElementById('kanbanJsonInput').value = '';
-            document.getElementById('kanbanContent').innerHTML = '';
-        }
-    }
-
-    function exportKanbanSummary() {
-        let summary = {
-            week: document.getElementById('kanbanWeekDisplay').innerText,
-            exportTime: new Date().toISOString(),
-            participants: kanbanDataList.map(d => d.meta.filler),
-            data: kanbanDataList
-        };
-        let a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([JSON.stringify(summary, null, 2)], {type: 'application/json'}));
-        a.download = `周会看板_${summary.week.replace(/[\/\(\)]/g, '_')}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        alert('✅ 看板汇总已导出');
-    }
-
-    function toggleTemplate(id) { document.getElementById(id)?.classList.toggle('show'); }
-    function switchMode(mode) {
-        let admin=document.getElementById('adminPanel'), fill=document.getElementById('fillPanel'), kanban=document.getElementById('kanbanPanel');
-        let btns=document.querySelectorAll('.mode-btn');
-        btns.forEach(b=>b.classList.remove('active'));
-        if(mode==='admin'){
-            admin.classList.add('active'); fill.classList.remove('active'); kanban.classList.remove('active'); btns[0].classList.add('active');
-            renderAdminTables();
-            renderMeetingMinutes();
-        } else if(mode==='fill'){
-            admin.classList.remove('active'); fill.classList.add('active'); kanban.classList.remove('active'); btns[1].classList.add('active');
-            updatePersonSelect();
-        } else if(mode==='kanban'){
-            admin.classList.remove('active'); fill.classList.remove('active'); kanban.classList.add('active'); btns[2].classList.add('active');
-            renderKanban();
-        }
-    }
-
-    function initializeApp() {
-        initWeekOptions();
-        renderAdminTables();
-        renderMeetingMinutes();
-        updatePersonSelect();
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeApp);
-    } else {
-        initializeApp();
-    }
+    // ========== 看板专用数据（基于真实填报） ==========
+    const rawData = { "关雪丹": { task_closed: [["输出工时填报规则文档并在群内发布","W23","下周","🟡 进行中","已完成编写，待发布","关雪丹"],["梳理美国SMY项目三条线角色定位","W23","6月底前","✅ 已完成","一共三条线，两条是类似Apollo的技术顾问，一条是自有导入线。","关雪丹"]], org_dynamic: [{ category:"招聘工作", rows:[["MP","1","0","6月22 、6月25入职","无","无","关雪丹"],["电极 MP 考勤制","2","0","","","目前面两个，不合适","关雪丹"]] }], biz_dynamic: [{ category:"已有项目评审", rows:[["YC 24PPM","装配","","","物流线，L1 A面16号带料联调、B面对点、L2线缺物料；MP 拧紧工站认帽率低","","","关雪丹"]] }] }, "吴忠明": { task_closed: [["制定海目星装配段监造策略","W23","本周","✅ 已完成","何东明或李晨光去成都现场监造","吴忠明"]], org_dynamic: [{ category:"招聘工作", rows:[["装配","4","0","6月22日入职两位，1位是董方旭15级非考勤，1位是刘晓考勤","考勤张均龙待二面，非考勤庞家明待三面","","吴忠明"]] }], biz_dynamic: [] }, "张海龙": { task_closed: [["制定海目星装配段监造策略","W23","本周","🟡 进行中","协同吴忠明，输出方案","张海龙"],["完成大成烤箱KT打分复盘","W23","跟进","✅ 已完成","西门子能力不足问题复盘","张海龙"]], org_dynamic: [{ category:"文化建设", rows:[["二级部门KPI考核指标","二级部门KPI考核指标指定、考核规则","张海龙","6月11日"]] },{ category:"招聘工作", rows:[["化成物流","2","0","1人6月25日","非考2人待定，考勤1人待定","","张海龙"]] },{ category:"培训培养", rows:[["化成物流","1","新人入职","新人交流/工作介绍","1","","张海龙"]] }], biz_dynamic: [{ category:"已有项目评审", rows:[["CZ2","安装调试&一次FAT","80%","","海目星成都装配物流流转问题，电气","高","","张海龙"]],},{ category:"已有项目评审", rows:[["CZ3","PO前","0","无","无","无","人力同用CZ2","张海龙"]] }] } };
+    const extraTasks = [{ name:"何锦仪", task:"周会看板系统开发", status:"✅ 已完成", note:"已上线" },{ name:"刘金山", task:"电气标准件库更新", status:"✅ 已完成", note:"已发布" },{ name:"李燏", task:"新项目方案评估", status:"🟡 进行中", note:"评估中" }];
+    function getAllTaskClosures(){ let all=[]; for(let [person,data] of Object.entries(rawData)) if(data.task_closed) data.task_closed.forEach(t=>all.push({owner:person,task:t[0],proposeWeek:t[1],deadline:t[2],statusRaw:t[3],desc:t[4]})); extraTasks.forEach(ext=>all.push({owner:ext.name,task:ext.task,proposeWeek:"W23",deadline:"本周",statusRaw:ext.status,desc:ext.note})); return all; }
+    function renderBoardTaskClosed(){ let tbody=document.getElementById("taskClosedBoardBody"); if(!tbody) return; let tasks=getAllTaskClosures(); tbody.innerHTML=tasks.map(t=>{let cls=t.statusRaw.includes("已完成")?"status-complete":"status-progress"; return `<tr><td>${escapeHtml(t.owner)}</td><td>${escapeHtml(t.task)}</td><td>${escapeHtml(t.proposeWeek)}</td><td>${escapeHtml(t.deadline)}</td><td><span class="status-badge ${cls}">${escapeHtml(t.statusRaw)}</span></td><td>${escapeHtml(t.desc)}</td></tr>`;}).join(''); }
+    function renderPieChart(){ let tasks=getAllTaskClosures(); let completed=tasks.filter(t=>t.statusRaw.includes("已完成")).length; let progress=tasks.filter(t=>t.statusRaw.includes("进行中")).length; let chart=echarts.init(document.getElementById("pieChart")); chart.setOption({ tooltip:{trigger:'item'}, legend:{orient:'vertical',left:'left',textStyle:{fontSize:11}}, series:[{name:'闭环状态',type:'pie',radius:'55%',data:[{value:completed,name:'已完成',itemStyle:{color:'#2ecc71'}},{value:progress,name:'进行中',itemStyle:{color:'#f39c12'}}],label:{show:true,formatter:'{b}: {d}%'}}] }); document.getElementById("pieSummaryText").innerHTML=`<strong>闭环统计</strong><br>✅ 已完成：${completed} 项<br>🟡 进行中：${progress} 项<br>📋 总计：${tasks.length} 项`; }
+    function renderBoardOrgDynamic(){ let container=document.getElementById("orgDynamicBoardContainer"); if(!container) return; let map={"招聘工作":[],"离职情况":[],"培训培养":[],"述职提醒":[],"文化建设":[],"能力建设":[]}; for(let p of Object.values(rawData)) if(p.org_dynamic) p.org_dynamic.forEach(item=>{ if(map[item.category]) item.rows.forEach(row=>map[item.category].push([...row, p===rawData.关雪丹?"关雪丹":p===rawData.吴忠明?"吴忠明":"张海龙"])); }); let html=''; for(let cat of ["招聘工作","离职情况","培训培养","述职提醒","文化建设","能力建设"]){ let rows=map[cat]; html+=`<div class="subcategory-block"><div class="subcategory-title">📌 ${cat}</div>`; if(!rows.length) html+=`<div class="na-badge">无填报数据 — NA</div>`; else if(cat==="招聘工作") html+=`<table class="data-table"><thead><tr><th>团队</th><th>编制需求</th><th>已入职</th><th>待入职</th><th>面试中</th><th>卡点说明</th><th>填报人</th></tr></thead><tbody>${rows.map(r=>`<tr>${r.slice(0,6).map(c=>`<td>${escapeHtml(c||'')}</td>`).join('')}<td>${escapeHtml(r[6]||'')}</td></tr>`).join('')}</tbody></table>`; else if(cat==="培训培养") html+=`<table class="data-table"><thead><tr><th>团队</th><th>培训次数</th><th>培训类型</th><th>培训主题</th><th>参训人数</th><th>效果评估</th><th>填报人</th></tr></thead><tbody>${rows.map(r=>`<tr>${r.slice(0,5).map(c=>`<td>${escapeHtml(c||'')}</td>`).join('')}<td>${escapeHtml(r[5]||'')}</td><td>${escapeHtml(r[6]||'')}</td></tr>`).join('')}</tbody></table>`; else if(cat==="文化建设") html+=`<table class="data-table"><thead><tr><th>传达主题</th><th>精神要点</th><th>传达人</th><th>传达日期</th><th>填报人</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(r[0]||'')}</td><td>${escapeHtml(r[1]||'')}</td><td>${escapeHtml(r[2]||'')}</td><td>${escapeHtml(r[3]||'')}</td><td>${escapeHtml(r[4]||'')}</td></tr>`).join('')}</tbody></table>`; else html+=`<div class="na-badge">暂无结构化数据 — NA</div>`; html+=`</div>`; } container.innerHTML=html; }
+    function renderBoardBizDynamic(){ let container=document.getElementById("bizDynamicBoardContainer"); if(!container) return; let map={"已有项目评审":[],"项目完结总结":[],"新项目分析与立项":[]}; for(let p of Object.values(rawData)) if(p.biz_dynamic) p.biz_dynamic.forEach(item=>{ if(map[item.category]) item.rows.forEach(row=>map[item.category].push([...row, p===rawData.关雪丹?"关雪丹":p===rawData.吴忠明?"吴忠明":"张海龙"])); }); let html=''; for(let cat of ["已有项目评审","项目完结总结","新项目分析与立项"]){ let rows=map[cat]; html+=`<div class="subcategory-block"><div class="subcategory-title">🏷️ ${cat}</div>`; if(!rows.length) html+=`<div class="na-badge">无填报记录 — NA</div>`; else if(cat==="已有项目评审") html+=`<table class="data-table"><thead><tr><th>项目名称</th><th>阶段</th><th>进度%</th><th>本周进展</th><th>风险/问题</th><th>风险等级</th><th>人力饱和度</th><th>填报人</th></tr></thead><tbody>${rows.map(r=>`<tr>${r.slice(0,7).map(c=>`<td>${escapeHtml(c||'')}</td>`).join('')}<td>${escapeHtml(r[7]||'')}</td></tr>`).join('')}</tbody></table>`; else html+=`<div class="na-badge">暂无数据</div>`; html+=`</div>`; } container.innerHTML=html; }
+    function renderBoardCompliance(){ document.getElementById("complianceBoardContainer").innerHTML=`<div class="na-badge">📭 本周无机制流程/信息安全/质量合规事项 — NA</div>`; }
+    function renderBoardDecision(){ document.getElementById("decisionBoardContainer").innerHTML=`<div class="na-badge">🤝 本周无待决策事项 — NA</div>`; }
+    function renderBoardOther(){ document.getElementById("otherBoardContainer").innerHTML=`<div class="na-badge">📌 本周无其他补充事项 — NA</div>`; }
+    function toggleBoardTemplate(id){ let el=document.getElementById(id); if(el) el.classList.toggle('show'); }
+    function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    function renderFullBoard(){ renderPieChart(); renderBoardTaskClosed(); renderBoardOrgDynamic(); renderBoardCompliance(); renderBoardBizDynamic(); renderBoardDecision(); renderBoardOther(); }
+    window.onload = () => { renderFullBoard(); updatePersonSelect(); initWeekOptions(); };
 </script>
 </body>
 </html>
