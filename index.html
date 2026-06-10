@@ -19,8 +19,8 @@
         .info-item { display: flex; gap: 8px; align-items: center; }
         .info-label { font-weight: 700; color: #2c6e9e; }
         input, select, textarea { border: 1px solid #cbdde9; border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; font-family: inherit; }
-        .section-title { 
-            font-size: 1.1rem; font-weight: 700; background: #e7f0f9; padding: 8px 14px; 
+        .section-title {
+            font-size: 1.1rem; font-weight: 700; background: #e7f0f9; padding: 8px 14px;
             border-left: 5px solid #2c6e9e; margin: 24px 0 12px 0; border-radius: 0 12px 12px 0;
             cursor: pointer;
         }
@@ -86,8 +86,13 @@
         <div class="section-title" onclick="toggleTemplate('template_task')">
             📌 议题一：上周任务闭环回顾 <span class="template-hint">ⓘ 点击查看模板</span>
         </div>
-        <div id="template_task" class="template-content">【议题一模板】逐项核对上周任务完成情况，评估是否按时、达标，分析未完成原因</div>
-        
+        <div id="template_task" class="template-content">【议题一模板】上周任务闭环回顾（逐条对齐）
+<br>1）逐项核对：按“上周任务清单”逐条确认是否已完成/进行中/未完成；
+<br>2）结果判定：对照任务目标与交付物（文档/方案/纪要/现场问题关闭等），评估是否“按时、达标”；
+<br>3）差异说明：若未完成或延期，必须写清未完成原因（资源/依赖/外部条件/方案变更等）与当前卡点；
+<br>4）闭环动作：明确下一步行动、需要谁支持、预计完成时间；
+<br>5）必要时升维：对跨部门/跨项目阻塞项，标记为需会上共同协调或升级事项。</div>
+
         <div class="auto-tip" id="taskTip">💡 请先在上方选择填写人</div>
         <table id="table_task">
             <thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:25%">未完成原因</th><th style="width:8%">负责人</th></tr></thead>
@@ -98,12 +103,18 @@
         <div class="section-title" onclick="toggleTemplate('template_org')">
             👥 议题二：组织人才与能力建设 <span class="template-hint">ⓘ 点击查看模板</span>
         </div>
-        <div id="template_org" class="template-content">【议题二模板】<br>1.招聘 2.离职 3.培训 4.述职 5.文化(EQP精神传达) 6.能力建设</div>
-        
+        <div id="template_org" class="template-content">【议题二模板】组织人才与能力建设（按小类逐条汇报）
+<br>1）招聘工作：总结当前招聘进展、遇到的问题、原因分析与卡点项，汇报总结当前招聘情况（已入职人数、待入职日期、面试中岗位等）；
+<br>2）离职情况：分析员工离职原因（个人原因/组织原因），重点关注 B+ 及以上员工与关键岗位；
+<br>3）培训培养：统计周期内培训次数（公司通用/技术内训/外训），给出培训主题、参训人数、效果评估与后续计划；
+<br>4）定期述职：到规定时间（季度/年度/试用期等）按制度执行，明确需述职人员、提醒情况与计划述职日期；
+<br>5）文化建设：帮助员工理解并落实公司文化（含 EQP 周会精神传达），说明传达主题、要点、传达人与日期；
+<br>6）能力建设：通用技术的开发与导入，设备核心控制技术的掌握，以及专利/标准/规范等工作，明确进展状态与下一步计划。</div>
+
         <div style="background: #fff3e0; border-left: 3px solid #e6b422; padding: 8px 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.75rem; color: #7d6608;">
             💡 如果您是本周会议主持人，请在下方「文化建设」小类中填写 EQP 周会精神传达内容
         </div>
-        
+
         <div class="sub-section">➕ 添加组织人才项（选择小类）</div>
         <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
             <select id="orgCategorySelect" style="width:200px;">
@@ -122,7 +133,11 @@
         <div class="section-title" onclick="toggleTemplate('template_process')">
             🔐 议题三：机制流程/信息安全/质量合规 <span class="template-hint">ⓘ 点击查看模板</span>
         </div>
-        <div id="template_process" class="template-content">【议题三模板】检查公司及部门层面的机制流程、信息安全、质量规范的执行与更新情况</div>
+        <div id="template_process" class="template-content">【议题三模板】机制流程 / 信息安全 / 质量合规（执行与更新检查）
+<br>1）机制流程：核查本周涉及的流程是否按制度执行（评审/审批/归档/变更等），如有偏差说明原因与纠正措施；
+<br>2）信息安全：检查账号权限、资料分级、外发/共享、设备与介质使用等是否合规；如出现风险点，给出风险等级与整改计划；
+<br>3）质量合规：对质量规范、检查清单、文档版本、监造/验收要求等的执行情况进行复盘；
+<br>4）更新动作：若制度/流程/规范需要升版或补充，明确负责人、计划完成时间与输出物（SOP/模板/检查表/培训宣贯）。</div>
         <table id="table_compliance">
             <thead><tr><th>事项</th><th>当前状态</th><th>本周进展</th><th>下一步计划</th><th>负责人</th><th>完成时间</th><th style="width:60px">操作</th></tr></thead>
             <tbody id="complianceTbody"><tr><td colspan="7" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr></tbody>
@@ -133,8 +148,11 @@
         <div class="section-title" onclick="toggleTemplate('template_project')">
             🏭 议题四：具体业务 <span class="template-hint">ⓘ 点击查看模板</span>
         </div>
-        <div id="template_project" class="template-content">【议题四模板】<br>1.已有项目评审 2.项目完结总结 3.新项目分析与立项</div>
-        
+        <div id="template_project" class="template-content">【议题四模板】具体业务（按业务小类汇报）
+<br>1）已有项目评审：汇报各项目进度（里程碑/完成度）、识别风险与问题（含风险等级）、评估人力资源分配与饱和度，并给出本周进展与下周计划；
+<br>2）项目完结总结：对已完成项目进行复盘，分析资源投入产出，沉淀经验教训，明确人力释放与再分配安排；
+<br>3）新项目分析与立项：介绍新项目信息，进行需求分析与资源需求评估，说明当前状态、关键决策点与负责人。</div>
+
         <div class="sub-section">➕ 添加具体业务项（选择小类）</div>
         <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
             <select id="bizCategorySelect" style="width:200px;">
@@ -150,7 +168,12 @@
         <div class="section-title" onclick="toggleTemplate('template_decision')">
             🤝 议题五：共同决策 <span class="template-hint">ⓘ 点击查看模板</span>
         </div>
-        <div id="template_decision" class="template-content">【议题五模板】汇报需共同决策事项的各选项逻辑，给出相关材料及建议方案</div>
+        <div id="template_decision" class="template-content">【议题五模板】共同决策（材料齐备、方案清晰）
+<br>1）事项描述：明确需决策的事项范围与影响面；
+<br>2）背景与选项逻辑：阐明背景、约束条件、可选方案及各方案逻辑（成本/周期/风险/资源/质量等）；
+<br>3）建议方案：给出推荐方案与理由，并说明备选方案触发条件；
+<br>4）支撑材料：提供必要数据/图纸/评审结论/对齐记录等；
+<br>5）决策时点：明确“需决策时间”；若为团队内个人提出，则由该提出人直接汇报。</div>
         <table id="table_decision">
             <thead><tr><th>决策事项</th><th>背景/选项逻辑</th><th>建议方案</th><th>需决策时间</th><th>提出人</th><th style="width:60px">操作</th></tr></thead>
             <tbody id="decisionTbody"><tr><td colspan="6" style="text-align:center;">点击下方按钮添加决策项</td><td style="display:none;"></td></tr></tbody>
@@ -161,7 +184,11 @@
         <div class="section-title" onclick="toggleTemplate('template_other')">
             📌 议题六：其他 <span class="template-hint">ⓘ 点击查看模板</span>
         </div>
-        <div id="template_other" class="template-content">【议题六模板】讨论其他未出现在上述分类中的议题，收集并归类，纳入后续跟踪</div>
+        <div id="template_other" class="template-content">【议题六模板】其他（补充议题收集与归类）
+<br>1）收集：讨论其他未出现在上述分类中的议题，确保信息完整（事项/说明/建议/提出人）；
+<br>2）归类：会后将“其他”中的事项按组织能效/项目/能力/机制流程等归类；
+<br>3）纳入跟踪：形成可闭环的任务条目（抛出周次、预计完成、实际完成、状态：进行/完成/流产）；
+<br>4）升格：若同类事项数量足够或长期出现，则将其固化为新的议题点并在后续周会持续跟踪。</div>
         <table id="table_other">
             <thead><tr><th>事项</th><th>说明</th><th>建议</th><th>提出人</th><th style="width:60px">操作</th></tr></thead>
             <tbody id="otherTbody"><tr><td colspan="5" style="text-align:center;">点击下方按钮添加事项</td><td style="display:none;"></td></tr></tbody>
@@ -183,7 +210,7 @@
     let taskLibrary = {
         "关雪丹": [
             { task: "输出工时填报规则文档并在群内发布", proposeWeek: "W23", deadline: "下周", remark: "协同刘金山" },
-            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前", remark: "协同刘金山" },
+            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前", remark: "协同刘金山" }
         ],
         "吴忠明": [
             { task: "制定海目星装配段监造策略", proposeWeek: "W23", deadline: "本周", remark: "协同张海龙，远程+现场方案" }
@@ -204,7 +231,7 @@
             { task: "优化周会模板（增加实际完成列、周次标识、会前收集机制）", proposeWeek: "W23", deadline: "下周会前", remark: "" }
         ]
     };
-    let personList = Object.keys(taskLibrary).filter(name => taskLibrary[name].length > 0);
+    let personList = Object.keys(taskLibrary);
 
     // ==================== 周次计算 ====================
     function getWeekNumber(date) {
@@ -293,7 +320,7 @@
         let tasks = taskLibrary[filler] || [];
         tip.innerHTML = `✅ 已加载 ${filler} 负责的 ${tasks.length} 项上周任务（W23），请确认完成情况`;
         tbody.innerHTML = '';
-        if(!tasks.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;">暂无任务</td></tr>'; return; }
+        if(!tasks.length){ tip.innerHTML = `ℹ️ ${filler}：您上周没有待办项（W23），本议题可跳过`; tbody.innerHTML='<tr><td colspan="6" style="text-align:center; color:#6c86a3;">您上周没有待办项</td></tr>'; return; }
         tasks.forEach(t=>{
             let row=tbody.insertRow();
             let td1=row.insertCell(0); let ta=document.createElement('textarea'); ta.rows=2; ta.style.width='100%'; ta.value=t.task; td1.appendChild(ta);
@@ -324,7 +351,7 @@
         wrapper.style.borderRadius = '12px';
         wrapper.style.padding = '10px';
         wrapper.style.background = '#fefefe';
-        
+
         let titleSpan = document.createElement('div');
         titleSpan.style.fontWeight = '600';
         titleSpan.style.marginBottom = '8px';
@@ -334,7 +361,7 @@
         titleSpan.innerHTML = `<span>📌 ${category}</span>
             <button class="btn-danger-icon" onclick="deleteDynamicCategory(this)">❌ 删除本小类</button>`;
         wrapper.appendChild(titleSpan);
-        
+
         let table = document.createElement('table');
         table.style.width = '100%';
         let thead = document.createElement('thead');
@@ -353,7 +380,7 @@
             row.insertCell(3).innerHTML = '<input style="width:100%" placeholder="会议日期">';
             table.appendChild(tbody);
             wrapper.appendChild(table);
-            
+
             let addRowBtn = document.createElement('button');
             addRowBtn.innerText = '+ 添加本小类行';
             addRowBtn.style.fontSize = '0.7rem';
@@ -363,7 +390,7 @@
             addRowBtn.style.borderRadius = '16px';
             addRowBtn.style.cursor = 'pointer';
             addRowBtn.style.marginTop = '8px';
-            addRowBtn.onclick = () => { 
+            addRowBtn.onclick = () => {
                 let tb = table.querySelector('tbody');
                 if(tb) {
                     let newRow = tb.insertRow();
@@ -374,7 +401,7 @@
             container.appendChild(wrapper);
             return;
         } else if(category === '能力建设') thead.innerHTML = '<tr><th>技术/事项</th><th>进展状态</th><th>说明</th><th>负责人</th></tr>';
-        
+
         table.appendChild(thead);
         let tbody = document.createElement('tbody');
         let colCount = thead.querySelectorAll('th').length;
@@ -382,7 +409,7 @@
         for(let i=0;i<colCount;i++) row.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
         table.appendChild(tbody);
         wrapper.appendChild(table);
-        
+
         let addRowBtn = document.createElement('button');
         addRowBtn.innerText = '+ 添加本小类行';
         addRowBtn.style.fontSize = '0.7rem';
@@ -392,7 +419,7 @@
         addRowBtn.style.borderRadius = '16px';
         addRowBtn.style.cursor = 'pointer';
         addRowBtn.style.marginTop = '8px';
-        addRowBtn.onclick = () => { 
+        addRowBtn.onclick = () => {
             let tb = table.querySelector('tbody');
             if(tb) {
                 let newRow = tb.insertRow();
@@ -407,7 +434,7 @@
     function addComplianceRow() { addRowWithDelete('complianceTbody', 7); }
     function addDecisionRow() { addRowWithDelete('decisionTbody', 6); }
     function addOtherRow() { addRowWithDelete('otherTbody', 5); }
-    
+
     function addRowWithDelete(tbodyId, colCount) {
         let tbody = document.getElementById(tbodyId);
         if(!tbody) return;
@@ -436,7 +463,7 @@
         wrapper.style.border = '1px solid #e2e8f0';
         wrapper.style.borderRadius = '12px';
         wrapper.style.padding = '10px';
-        
+
         let titleSpan = document.createElement('div');
         titleSpan.style.fontWeight = '600';
         titleSpan.style.marginBottom = '8px';
@@ -446,7 +473,7 @@
         titleSpan.innerHTML = `<span>📌 ${category}</span>
             <button class="btn-danger-icon" onclick="deleteDynamicCategory(this)">❌ 删除本小类</button>`;
         wrapper.appendChild(titleSpan);
-        
+
         let table = document.createElement('table');
         table.style.width = '100%';
         let thead = document.createElement('thead');
@@ -460,7 +487,7 @@
         for(let i=0;i<colCount;i++) row.insertCell(i).innerHTML = '<input style="width:100%" placeholder="请输入">';
         table.appendChild(tbody);
         wrapper.appendChild(table);
-        
+
         let addRowBtn = document.createElement('button');
         addRowBtn.innerText = '+ 添加本小类行';
         addRowBtn.style.fontSize = '0.7rem';
@@ -470,7 +497,7 @@
         addRowBtn.style.borderRadius = '16px';
         addRowBtn.style.cursor = 'pointer';
         addRowBtn.style.marginTop = '8px';
-        addRowBtn.onclick = () => { 
+        addRowBtn.onclick = () => {
             let tb = table.querySelector('tbody');
             if(tb) {
                 let newRow = tb.insertRow();
