@@ -47,6 +47,32 @@
         .btn-icon:hover { background: #e2e8f0; }
         .btn-danger-icon { background: #fde2e2; color: #c0392b; border: none; padding: 2px 10px; border-radius: 12px; font-size: 0.65rem; cursor: pointer; margin-left: 8px; }
         .btn-danger-icon:hover { background: #fcc; }
+
+        /* 会议纪要样式 */
+        .meeting-minutes-card {
+            background: #f5f8fc; border: 1px solid #d4e0ea; border-radius: 12px; padding: 12px; margin-bottom: 16px;
+        }
+        .meeting-header {
+            font-weight: 700; font-size: 0.9rem; color: #1e4663; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+        }
+        .meeting-header:hover { color: #2c6e9e; }
+        .meeting-toggle-icon { display: inline-block; transition: transform 0.3s; margin-right: 8px; }
+        .meeting-toggle-icon.collapsed { transform: rotate(-90deg); }
+        .meeting-content {
+            display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #d4e0ea;
+        }
+        .meeting-content.show { display: block; }
+        .meeting-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; font-size: 0.75rem; }
+        .meeting-info-item { color: #5c6f87; }
+        .meeting-info-label { font-weight: 600; color: #2c6e9e; display: inline-block; min-width: 60px; }
+        .meeting-topic {
+            background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 0.75rem;
+        }
+        .meeting-topic-badge { display: inline-block; background: #e7f0f9; color: #2c6e9e; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 600; margin-bottom: 4px; }
+        .meeting-topic-title { font-weight: 700; color: #1e4663; margin: 4px 0; }
+        .meeting-topic-desc { color: #5c6f87; margin: 4px 0; line-height: 1.4; white-space: pre-wrap; }
+        .meeting-topic-meta { display: flex; gap: 12px; margin-top: 6px; font-size: 0.7rem; color: #8aa0bc; }
+
         @media (max-width: 800px) { .container { padding: 16px; } th, td { font-size: 0.7rem; padding: 4px; } }
     </style>
 </head>
@@ -68,6 +94,38 @@
             <div class="info-item"><span class="info-label">当前周次：</span><span id="adminWeekDisplay" style="font-weight:600;">W24</span></div>
             <div class="info-item"><span class="info-label">💡 说明：</span><span style="color:#5c6f87;">以下任务来源于上周（W23）周会「下一步行动计划」</span></div>
         </div>
+
+        <!-- 会议纪要折叠区 -->
+        <div class="meeting-minutes-card" id="meetingMinutesCard">
+            <div class="meeting-header" onclick="toggleMeetingMinutes()">
+                <span><span class="meeting-toggle-icon collapsed">▶</span>📄 W23 会议纪要（点击展开）</span>
+                <span style="font-size:0.7rem; color:#8aa0bc; cursor:default;">共 <span id="topicCount">18</span> 个议题</span>
+            </div>
+            <div class="meeting-content" id="meetingContent">
+                <!-- 会议基本信息 -->
+                <div class="meeting-info" id="meetingInfoPanel"></div>
+
+                <!-- 议题列表 -->
+                <div style="margin-top: 16px;">
+                    <div style="font-weight:700; color:#1e4663; margin-bottom:8px;">📋 会议议题：</div>
+                    <div id="meetingTopicsPanel"></div>
+                </div>
+
+                <!-- 决策事项 -->
+                <div style="margin-top: 16px;">
+                    <div style="font-weight:700; color:#1e4663; margin-bottom:8px;">✅ 主要决策：</div>
+                    <div id="meetingDecisionsPanel" style="background:#fffbf0; border-left:3px solid #e6b422; padding:8px 12px; border-radius:4px; font-size:0.75rem; color:#7d6608;"></div>
+                </div>
+
+                <!-- 风险项 -->
+                <div style="margin-top: 16px;">
+                    <div style="font-weight:700; color:#1e4663; margin-bottom:8px;">⚠️ 主要风险：</div>
+                    <div id="meetingRisksPanel"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务库 -->
         <div id="taskTablesContainer"></div>
         <div class="footer-note">✅ 任务库由汇总人根据上周会议纪要更新</div>
     </div>
@@ -95,7 +153,7 @@
 
         <div class="auto-tip" id="taskTip">💡 请先在上方选择填写人</div>
         <table id="table_task">
-            <thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:20%">完成情况说明</th><th style="width:10%">负责人</th></tr></thead>
+            <thead><tr><th style="width:30%">上周任务</th><th style="width:10%">提出周次</th><th style="width:12%">预计完成时间</th><th style="width:15%">实际完成情况</th><th style="width:20%">完成情况说明</th><th style="width:13%">负责人</th></tr></thead>
             <tbody id="taskTbody"></tbody>
         </table>
 
@@ -201,38 +259,11 @@
         </div>
     </div>
 
-    <div class="footer-note">💡 填写流程：选择姓名 → 自动加载任务 → 勾选完成情况 → 添加小类数据 → 导出JSON发回汇总人<br>© 议题收集系统 v0.1 | 制作by何锦仪</div>
+    <div class="footer-note">💡 填写流程：选择姓名 → 自动加载任务 → 勾选完成情况 → 添加小类数据 → 导出JSON发回汇总人<br>© 议题收集系统 v0.2 | 制作by 何锦仪</div>
 </div>
 
+<script src="meeting-data.js"></script>
 <script>
-    // ==================== 任务库 - 仅来源于上周周会「下一步行动计划」 ====================
-    // 提出周次统一为 W23，预计完成时间根据行动计划中的描述填写
-    let taskLibrary = {
-        "关雪丹": [
-            { task: "输出工时填报规则文档并在群内发布", proposeWeek: "W23", deadline: "下周" },
-            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前" }
-        ],
-        "吴忠明": [
-            { task: "制定海目星装配段监造策略", proposeWeek: "W23", deadline: "本周" }
-        ],
-        "张海龙": [
-            { task: "制定海目星装配段监造策略", proposeWeek: "W23", deadline: "本周" },
-            { task: "完成大成烤箱KT打分复盘", proposeWeek: "W23", deadline: "跟进" }
-        ],
-        "梁志强": [],
-        "刘金山": [
-            { task: "输出工时填报规则文档并在群内发布", proposeWeek: "W23", deadline: "下周" },
-            { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前" }
-        ],
-        "李燏": [
-            { task: "输出CRA认证专题报告", proposeWeek: "W23", deadline: "6月底" }
-        ],
-        "何锦仪": [
-            { task: "优化周会模板（增加实际完成列、周次标识、会前收集机制）", proposeWeek: "W23", deadline: "下周会前" }
-        ]
-    };
-    let personList = Object.keys(taskLibrary);
-
     // ==================== 周次计算 ====================
     function getWeekNumber(date) {
         const d = new Date(date); d.setHours(0,0,0,0);
@@ -259,6 +290,84 @@
         select.innerHTML = weeks.map(w=>`<option value="${w}">${w}</option>`).join('');
         select.value = getWeekRangeText(today);
         document.getElementById('adminWeekDisplay').innerText = select.value;
+    }
+
+    // ==================== 会议纪要渲染 ====================
+    function renderMeetingMinutes() {
+        if (!meetingMinutes) return;
+
+        // 基本信息
+        const infoPanel = document.getElementById('meetingInfoPanel');
+        if (infoPanel) {
+            infoPanel.innerHTML = `
+                <div class="meeting-info-item">
+                    <span class="meeting-info-label">周次：</span>${meetingMinutes.week}
+                </div>
+                <div class="meeting-info-item">
+                    <span class="meeting-info-label">日期：</span>${meetingMinutes.meetingDate}
+                </div>
+                <div class="meeting-info-item">
+                    <span class="meeting-info-label">地点：</span>${meetingMinutes.location}
+                </div>
+                <div class="meeting-info-item">
+                    <span class="meeting-info-label">主持人：</span>${meetingMinutes.host}
+                </div>
+                <div class="meeting-info-item">
+                    <span class="meeting-info-label">参会人：</span>${meetingMinutes.attendees}
+                </div>
+                <div class="meeting-info-item">
+                    <span class="meeting-info-label">密级：</span>${meetingMinutes.classification}
+                </div>
+            `;
+        }
+
+        // 议题列表
+        const topicsPanel = document.getElementById('meetingTopicsPanel');
+        if (topicsPanel && meetingMinutes.topics) {
+            document.getElementById('topicCount').innerText = meetingMinutes.topics.length;
+            topicsPanel.innerHTML = meetingMinutes.topics.map(topic => `
+                <div class="meeting-topic">
+                    <div class="meeting-topic-badge">${topic.badge}</div>
+                    <div class="meeting-topic-title">${topic.number}. ${topic.title}</div>
+                    <div class="meeting-topic-desc">${topic.description}</div>
+                    <div class="meeting-topic-meta">
+                        <span>👤 负责人：${topic.owner}</span>
+                        <span>⏰ 预计完成：${topic.deadline}</span>
+                        <span>${topic.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 决策事项
+        const decisionsPanel = document.getElementById('meetingDecisionsPanel');
+        if (decisionsPanel && meetingMinutes.decisions) {
+            decisionsPanel.innerHTML = meetingMinutes.decisions.map((d, i) => 
+                `<div style="margin:6px 0;">• ${d}</div>`
+            ).join('');
+        }
+
+        // 风险项
+        const risksPanel = document.getElementById('meetingRisksPanel');
+        if (risksPanel && meetingMinutes.risks) {
+            risksPanel.innerHTML = meetingMinutes.risks.map(risk => `
+                <div style="background:white; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px; font-size:0.75rem;">
+                    <div style="font-weight:700; color:#1e4663;">🚨 ${risk.risk}</div>
+                    <div style="margin:4px 0; color:#5c6f87;">影响：${risk.impact}</div>
+                    <div style="margin:4px 0; color:#c0392b;">等级：${risk.level}</div>
+                    <div style="margin:4px 0; color:#5c6f87;">应对：${risk.mitigation}</div>
+                </div>
+            `).join('');
+        }
+    }
+
+    function toggleMeetingMinutes() {
+        const content = document.getElementById('meetingContent');
+        const icon = document.querySelector('.meeting-toggle-icon');
+        if (content) {
+            content.classList.toggle('show');
+            icon.classList.toggle('collapsed');
+        }
     }
 
     // ========== 任务库预览（只读） ==========
@@ -319,13 +428,13 @@
         let tasks = taskLibrary[filler] || [];
         tip.innerHTML = `✅ 已加载 ${filler} 负责的 ${tasks.length} 项上周任务（W23），请确认完成情况`;
         tbody.innerHTML = '';
-        if(!tasks.length){ tip.innerHTML = `ℹ️ ${filler}：您上周没有待办项（W23），本议题可跳过`; tbody.innerHTML='<tr><td colspan="6" style="text-align:center; color:#6c86a3;">暂无任务</td></tr>'; return; }
+        if(!tasks.length){ tip.innerHTML = `ℹ️ ${filler}：您上周没有待办项（W23），本议题可跳过`; tbody.innerHTML='<tr><td colspan="6" style="text-align:center; color:#6c86a3;">无待办任务</td></tr>'; return; }
         tasks.forEach(t=>{
             let row=tbody.insertRow();
             let td1=row.insertCell(0); let ta=document.createElement('textarea'); ta.rows=2; ta.style.width='100%'; ta.value=t.task; td1.appendChild(ta);
             let td2=row.insertCell(1); let inpWeek=document.createElement('input'); inpWeek.value=t.proposeWeek; inpWeek.readOnly=true; inpWeek.style.background='#f5f5f5'; td2.appendChild(inpWeek);
             let td3=row.insertCell(2); let inpDeadline=document.createElement('input'); inpDeadline.value=t.deadline; inpDeadline.readOnly=true; inpDeadline.style.background='#f5f5f5'; td3.appendChild(inpDeadline);
-            let td4=row.insertCell(3); let sel=document.createElement('select'); sel.innerHTML='<option value="">请选择</option><option>✅ 已完成</option><option>🔴 未完成</option><option>⏳ 进行中</option>'; td4.appendChild(sel);
+            let td4=row.insertCell(3); let sel=document.createElement('select'); sel.innerHTML='<option value="">请选择</option><option>✅ 已完成</option><option>🔴 未完成</option><option>🟡 进行中</option>'; td4.appendChild(sel);
             let td5=row.insertCell(4); let rea=document.createElement('textarea'); rea.rows=2; rea.placeholder='填写完成情况说明（完成内容、遇到的问题、下一步计划等）'; td5.appendChild(rea);
             let td6=row.insertCell(5); let owner=document.createElement('input'); owner.value=filler; owner.readOnly=true; owner.style.background='#f5f5f5'; td6.appendChild(owner);
         });
@@ -588,6 +697,7 @@
         if(mode==='admin'){
             admin.classList.add('active'); fill.classList.remove('active'); btns[0].classList.add('active');
             renderAdminTables();
+            renderMeetingMinutes();
         } else {
             admin.classList.remove('active'); fill.classList.add('active'); btns[1].classList.add('active');
             updatePersonSelect();
@@ -596,6 +706,7 @@
 
     initWeekOptions();
     renderAdminTables();
+    renderMeetingMinutes();
     updatePersonSelect();
 </script>
 </body>
