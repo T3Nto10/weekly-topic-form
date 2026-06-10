@@ -211,7 +211,6 @@ const meetingMinutes = {
     { id: 5, action: "梳理美国SMY项目三条线角色定位", owner: "关雪丹、刘金山", deadline: "6月底前" },
     { id: 6, action: "输出CRA认证专题报告", owner: "李燏", deadline: "6月底" },
     { id: 7, action: "完成大成烤箱KT打分复盘", owner: "张海龙", deadline: "跟进" },
-    { id: 8, action: "将监造要求写入电气开发流程", owner: "关雪丹", deadline: "跟进" }
   ],
 
   risks: [
@@ -237,7 +236,7 @@ const taskLibrary = {
   ],
   "梁志强": [],
   "刘金山": [
-    { task: "输出工时填报规则文档并在群内发���", proposeWeek: "W23", deadline: "下周" },
+    { task: "输出工时填报规则文档并在群内发SOP", proposeWeek: "W23", deadline: "下周" },
     { task: "梳理美国SMY项目三条线角色定位", proposeWeek: "W23", deadline: "6月底前" }
   ],
   "李燏": [
