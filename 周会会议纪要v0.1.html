@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>电气周会纪要 | W23 (2026.6.1-6.7)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f5;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 32px 24px;
+            color: #1e2f3e;
+        }
+
+        .meeting-wrapper {
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            padding: 28px 32px 40px 32px;
+        }
+
+        .header-section {
+            border-bottom: 2px solid #dce5ec;
+            padding-bottom: 20px;
+            margin-bottom: 28px;
+        }
+
+        .title-main {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e4663;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .week-badge {
+            background: #2c6e9e;
+            color: white;
+            font-size: 0.85rem;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+        }
+
+        .meta-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            margin-top: 16px;
+            background: #f8fafd;
+            padding: 14px 20px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+        }
+
+        .meta-item {
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        .meta-label {
+            font-weight: 700;
+            color: #2c6e9e;
+            min-width: 70px;
+        }
+
+        .meta-value {
+            color: #1e3a5f;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0 28px 0;
+            font-size: 0.85rem;
+        }
+
+        .data-table th {
+            background-color: #eef3fc;
+            padding: 14px 12px;
+            border: 1px solid #d4e0ea;
+            font-weight: 700;
+            color: #1a4c7a;
+            font-size: 0.85rem;
+        }
+
+        .data-table td {
+            border: 1px solid #e2e8f0;
+            padding: 14px 12px;
+            vertical-align: top;
+            background: #fff;
+            line-height: 1.5;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: #e7f0f9;
+            padding: 8px 16px;
+            border-left: 5px solid #2c6e9e;
+            border-radius: 14px 0 0 14px;
+            margin: 28px 0 16px 0;
+        }
+
+        .topic-badge {
+            display: inline-block;
+            background-color: #eef2fa;
+            color: #1e5d9e;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-right: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .status-progress { background: #fff3cf; color: #a1662f; }
+        .status-pending { background: #ffe0cc; color: #bd6b1e; }
+        .status-decision { background: #d9eafb; color: #1e5d9e; }
+
+        .risk-high {
+            background: #ffebee;
+            color: #c0392b;
+            font-weight: 600;
+        }
+
+        .resolution-block {
+            background: #f9fbfd;
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin: 20px 0 12px 0;
+            border-left: 3px solid #2c6e9e;
+        }
+
+        .inline-desc {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #2c5270;
+            background: #f9fbfe;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border-left: 3px solid #8db5d6;
+        }
+
+        .responsible-highlight {
+            font-weight: 700;
+            background-color: #fff0d6;
+            padding: 0 4px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        @media (max-width: 700px) {
+            .meeting-wrapper {
+                padding: 16px;
+            }
+            .data-table th, .data-table td {
+                font-size: 0.74rem;
+                padding: 8px 6px;
+            }
+            .meta-grid {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="meeting-wrapper">
+    <div class="header-section">
+        <div class="title-main">
+            <span>⚡ 电气内部周会会议纪要</span>
+            <span class="week-badge">W23 (2026.6.1-6.7)</span>
+        </div>
+        <div class="meta-grid">
+            <div class="meta-item"><span class="meta-label">会议日期：</span><span class="meta-value">2026-06-04</span></div>
+            <div class="meta-item"><span class="meta-label">会议地点：</span><span class="meta-value">Teams线上会议</span></div>
+            <div class="meta-item"><span class="meta-label">主持人：</span><span class="meta-value">吴忠明</span></div>
+            <div class="meta-item"><span class="meta-label">参与人员：</span><span class="meta-value">徐斌；关雪丹；梁志强；张海龙；李燏；刘金山；何锦仪</span></div>
+            <div class="meta-item"><span class="meta-label">密级：</span><span class="meta-value">内部公开</span></div>
+        </div>
+    </div>
+
+    <div class="section-title">📋 会议议题与内容</div>
+    <table class="data-table">
+        <thead>
+            <tr><th style="width:6%">序号</th><th style="width:48%">议题内容（含详细说明）</th><th style="width:14%">负责人</th><th style="width:12%">完成时间</th><th style="width:10%">状态</th></tr>
+        </thead>
+        <tbody>
+            <!-- 议题一 -->
+            <tr><td>1</td>
+                <td><span class="topic-badge">📌 议题一：上周任务闭环回顾</span> 工时填报规则统一
+                <div class="inline-desc">• 电气组工时排名第二但未达100%<br>• 存在员工休假填错、规则不清晰等问题<br>• 需统一能源侧与动力侧填报规则，形成文档发群</div></td>
+                <td>关雪丹、刘金山</td><td>下周前</td><td><span class="status-badge status-progress">🟡 进行中</span></td>
+             </tr>
+            <tr><td>2</td>
+                <td><span class="topic-badge">📌 议题一：上周任务闭环回顾</span> 海目星装配段监造策略制定
+                <div class="inline-desc">• 避免最后阶段被动，需输出远程+现场联合监造方案</div></td>
+                <td>张海龙、吴忠明</td><td>本周</td><td><span class="status-badge status-progress">🟡 进行中</span></td>
+             </tr>
+            <!-- 议题二 -->
+            <tr><td>3</td>
+                <td><span class="topic-badge">👥 议题二：组织人才 - 招聘工作</span> 招聘工作与编制对齐
+                <div class="inline-desc">• 正式编制（非考勤）共7个指标；考勤制统一招5人（建议3人欧姆龙+2人西门子）<br>• 吴忠明：需求3人，2人待入职，2人三面中<br>• 关雪丹：2人已发offer<br>• 张海龙：物流需求3人，1人三面中，2人一面待定<br>• 面试分工：西门子（关雪丹/张海龙）、欧姆龙（梁志强/吴忠明）</div></td>
+                <td>各团队负责人</td><td>持续跟进</td><td><span class="status-badge status-progress">🟡 进行中</span></td>
+             </tr>
+            <tr><td>4</td>
+                <td><span class="topic-badge">👥 议题二：组织人才 - 离职情况</span> 离职情况分析与员工沟通
+                <div class="inline-desc">• 近期离职原因：出差多、工作压力大<br>• B+及以上员工离职需重点分析原因<br>• 需加强员工沟通，向团队传达出差是行业常态但非长期</div></td>
+                <td>各团队负责人</td><td>持续跟进</td><td><span class="status-badge status-progress">🟡 进行中</span></td>
+             </tr>
+            <tr><td>5</td>
+                <td><span class="topic-badge">👥 议题二：组织人才 - 培训与述职</span> 技术培训与述职安排
+                <div class="inline-desc">• 上半年未组织技术培训，需各组重视<br>• 述职时间定于7月15日以后（通电节点后）</div></td>
+                <td>各团队负责人</td><td>7月中旬</td><td><span class="status-badge status-pending">⚪ 待开始</span></td>
+             </tr>
+            <tr><td>6</td>
+                <td><span class="topic-badge">👥 议题二：组织人才 - 文化建设</span> 文化精神传达
+                <div class="inline-desc">• 自研不是目的，掌握技术标准、构建能力护城河才是核心<br>• 运维总成本（Total Cost）优先于单纯硬件采购成本</div></td>
+                <td>各团队负责人</td><td>持续</td><td><span class="status-badge status-progress">🟡 进行中</span></td>
+             </tr>
+            <!-- 议题三 -->
+            <tr><td>7</td><td><span class="topic-badge">🔐 议题三：机制流程/信息安全</span> 信息安全外审<div class="inline-desc">• 本月进行外审，需各组配合提供证据</div></td><td>关雪丹</td><td>本月</td><td><span class="status-badge status-progress">🟡 进行中</span></td></tr>
+            <tr><td>8</td><td><span class="topic-badge">🔐 议题三：机制流程/质量合规</span> 工时填报流程规范文档<div class="inline-desc">• 需输出标准化SOP并在群内发布</div></td><td>关雪丹、刘金山</td><td>下周前</td><td><span class="status-badge status-progress">🟡 进行中</span></td></tr>
+            <tr><td>9</td><td><span class="topic-badge">🔐 议题三：机制流程/质量合规</span> 电气监造流程写入开发流程<div class="inline-desc">• 将监造要求纳入电气开发流程，升版文件</div></td><td>关雪丹</td><td>跟进</td><td><span class="status-badge status-progress">🟡 进行中</span></td></tr>
+            <!-- 议题四 -->
+            <tr><td>10</td><td><span class="topic-badge">🏭 议题四：具体业务 - 已有项目</span> 宜昌项目风险与气源问题<div class="inline-desc">• 气源不足是主要卡点，电机选型拆装问题需确认责任归属<br>• 关雪丹下周赴宜昌现场协调</div></td><td>关雪丹、吴忠明</td><td>下周</td><td><span class="status-badge status-progress">🟡 进行中</span></td></tr>
+            <tr><td>11</td><td><span class="topic-badge">🏭 议题四：具体业务 - 已有项目</span> 沧州二项目<div class="inline-desc">• 装配段（海目星）延期风险需制定监造策略<br>• 烘烤段（大成）西门子能力不足风险，需复盘KT打分<br>• 立库技术争议已解决</div></td><td>张海龙、吴忠明</td><td>持续跟进</td><td><span class="status-badge status-progress">🟡 进行中</span></td></tr>
+            <tr><td>12</td><td><span class="topic-badge">🏭 议题四：具体业务 - 已有项目</span> 沧州三项目<div class="inline-desc">• 项目暂停，预计8月重启</div></td><td>张海龙</td><td>预计8月</td><td><span class="status-badge status-pending">⚪ 待开始</span></td></tr>
+            <tr><td>13</td><td><span class="topic-badge">🏭 议题四：具体业务 - 已有项目</span> 全球量产（美国/英国/日本）<div class="inline-desc">• 英国需西门子/SEW资源支持<br>• 美国SMY项目需梳理3条线角色定位（关雪丹&刘金山6月底前完成）</div></td><td>梁志强、关雪丹</td><td>持续跟进</td><td><span class="status-badge status-progress">🟡 进行中</span></td></tr>
+            <tr><td>14</td><td><span class="topic-badge">🏭 议题四：具体业务 - 已有项目</span> 西班牙项目（CRA认证）<div class="inline-desc">• CRA认证成本评估完成，硬件成本基本不增<br>• 6月底输出专题报告</div></td><td>李燏</td><td>6月底</td><td><span class="status-badge status-progress">🟡 进行中</span></td></tr>
+            <tr><td>15</td><td><span class="topic-badge">🏭 议题四：具体业务 - 新项目分析</span> 美国SMY模组线角色定位<div class="inline-desc">• 三条线角色未明确，需拉通确认</div></td><td>关雪丹、刘金山</td><td>6月底前</td><td><span class="status-badge status-progress">🟡 进行中</span></td></tr>
+            <!-- 议题五 -->
+            <tr><td>16</td><td><span class="topic-badge">🤝 议题五：共同决策</span> 业务资源分配模式<div class="inline-desc">• 正式员工优先 → 艾德玛承接 → 外部临时外包 → 业务切割</div></td><td>各团队负责人</td><td>即日起执行</td><td><span class="status-badge status-decision">✅ 已决策</span></td></tr>
+            <tr><td>17</td><td><span class="topic-badge">🤝 议题五：共同决策</span> PDT考核对齐要求<div class="inline-desc">• 需求清晰、变更管控、快速决策、年度规划、能力锁定、插单规则</div></td><td>部门</td><td>已共识</td><td><span class="status-badge status-decision">✅ 已决策</span></td></tr>
+            <!-- 议题六 -->
+            <tr><td>18</td>
+                <td><span class="topic-badge">📌 议题六：其他</span> 周会流程优化（模板升级）
+                <div class="inline-desc">
+                    <strong>需改动项：</strong><br>
+                    1. 模板增加“实际完成情况”列，逐项核对上周任务是否按时达标<br>
+                    2. 增加周次标识（如W23）<br>
+                    3. 建立会前议题收集机制，周三前各负责人填写，会上快速过项<br>
+                    4. 决议/待办强制关联责任人和截止时间
+                </div>
+                </td>
+                <td>何锦仪</td><td>下周前</td><td><span class="status-badge status-progress">🟡 进行中</span></td>
+             </tr>
+        </tbody>
+    </table>
+
+    <!-- 会议决议项 -->
+    <div class="section-title">📌 会议决议项</div>
+    <div class="resolution-block">
+        <ol style="margin-left: 20px; line-height: 1.7; display: flex; flex-direction: column; gap: 8px;">
+            <li>工时填报规则需形成文档，由 <span class="responsible-highlight">关雪丹、刘金山</span> 于下周前完成并群内发布</li>
+            <li>各团队负责人需对齐编制数据，按最终版执行招聘计划</li>
+            <li>海目星装配段需制定监造策略（<span class="responsible-highlight">张海龙、吴忠明</span> 负责）</li>
+            <li>美国SMY项目三条线角色定位由 <span class="responsible-highlight">关雪丹、刘金山</span> 负责梳理</li>
+            <li>业务资源分配模式按“正式员工优先 → 艾德玛承接 → 外部外包 → 业务切割”执行</li>
+            <li>述职时间定于7月15日以后</li>
+            <li>周会模板由 <span class="responsible-highlight">何锦仪</span> 优化：增加实际完成列、周次标识、会前收集机制</li>
+        </ol>
+    </div>
+
+    <!-- 下一步行动计划 -->
+    <div class="section-title">📌 下一步行动计划</div>
+    <table class="data-table">
+        <thead><tr><th>序号</th><th>行动计划</th><th>负责人</th><th>完成时间</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>输出工时填报规则文档并在群内发布</td><td>关雪丹、刘金山</td><td>下周</td></tr>
+            <tr><td>2</td><td>优化周会模板（增加实际完成列、周次标识、会前收集机制）</td><td>何锦仪</td><td>下周会前</td></tr>
+            <tr><td>3</td><td>赴宜昌现场考察，协调气源问题</td><td>关雪丹</td><td>下周</td></tr>
+            <tr><td>4</td><td>制定海目星装配段监造策略</td><td>张海龙、吴忠明</td><td>本周</td></tr>
+            <tr><td>5</td><td>梳理美国SMY项目三条线角色定位</td><td>关雪丹、刘金山</td><td>6月底前</td></tr>
+            <tr><td>6</td><td>输出CRA认证专题报告</td><td>李燏</td><td>6月底</td></tr>
+            <tr><td>7</td><td>完成大成烤箱KT打分复盘</td><td>张海龙</td><td>跟进</td></tr>
+            <tr><td>8</td><td>将监造要求写入电气开发流程</td><td>关雪丹</td><td>跟进</td></tr>
+        </tbody>
+    </table>
+
+    <!-- 风险项 -->
+    <div class="section-title">⚠️ 重点关注风险与待升级项</div>
+    <table class="data-table">
+        <thead><tr><th>风险项</th><th>影响范围</th><th>风险等级</th><th>缓解动作</th></tr></thead>
+        <tbody>
+            <tr><td>宜昌厂房气源长期不足</td><td>调试延期</td><td class="risk-high">🔴 高</td><td>关雪丹下周现场协调</td></tr>
+            <tr><td>海目星装配段监造缺失</td><td>沧州二交付</td><td class="risk-high">🔴 高</td><td>张海龙/吴忠明制定监造策略</td></tr>
+            <tr><td>美国SMY项目角色模糊</td><td>人力冲突</td><td class="risk-high">🟡 中</td><td>关雪丹&刘金山6月底前梳理</td></tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 28px; font-size: 0.75rem; color: #6c86a3; text-align: center;">
+        电气内部周会 · W23（2026.6.1-6.7）
+    </div>
+</div>
+</body>
+</html>
