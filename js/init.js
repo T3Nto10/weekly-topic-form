@@ -21,7 +21,6 @@ window.deleteDynamicCategory = deleteDynamicCategory;
 window.clearFillData = clearFillData;
 window.exportFillData = exportFillData;
 window.copyReportToClipboard = copyReportToClipboard;
-window.submitToSmartSheet = submitToSmartSheet;
 window.submitFillToSmartSheet = submitFillToSmartSheet;
 window.submitDashboardToSmartSheet = submitDashboardToSmartSheet;
 window.exportDashboardToJSON = exportDashboardToJSON;

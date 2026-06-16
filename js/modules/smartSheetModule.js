@@ -1,18 +1,25 @@
 // ==================== 企业微信智能表格提交模块 ====================
+// 通过 Netlify Functions 转发请求到企微 Webhook
 
-// ===== 填写模式 Webhook 地址（原有，保持不变） =====
-const SMART_SHEET_WEBHOOK_URL = "https://qyapi.weixin.qq.com/cgi-bin/wedoc/smartsheet/webhook?key=6DMSwlWKO6zPmo09M6JRDB2mhuAGu08kS5mdJeeoYZtTe6RYLE3Aw77pHRzmDwU4QcxBJXkD7ZACjILmeRMV7Y6xgOBLz7J7w1U98pp2C8Kb";
+// ===== 配置 =====
+const isLocal = window.location.protocol === 'file:' 
+    || window.location.hostname === 'localhost' 
+    || window.location.hostname === '127.0.0.1';
 
-// ===== 看板模式 Webhook 地址（新增，独立配置） =====
-const SMART_SHEET_WEBHOOK_URL_DASHBOARD = "https://qyapi.weixin.qq.com/cgi-bin/wedoc/smartsheet/webhook?key=70O2Z7537M8KhYcWbY8d7g23egOiJjoOyvgyls84VZHJedoIoNTCJp2CoE59DhzgqYefdhuISZGnYJ6znw45vI7LaFU6onEgjFHsB33fH5qb";
+// 替换为你实际的 Netlify 站点名
+const SITE_NAME = "weekly-topic";
+
+const NETLIFY_FUNCTION_URL = isLocal 
+    ? `https://${SITE_NAME}.netlify.app/.netlify/functions/webhook`
+    : "/.netlify/functions/webhook";
+
+console.log(`📡 Netlify Functions 地址: ${NETLIFY_FUNCTION_URL}`);
+console.log(`📍 当前环境: ${isLocal ? '本地开发' : '生产环境'}`);
 
 // ============================================================
-// 工具函数（安全版本，不依赖外部函数）
+// 工具函数（安全版本）
 // ============================================================
 
-/**
- * 获取表格数据（安全版本）
- */
 function safeGetTbodyData(tbodyId, excludeLastOpCol = true) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return [];
@@ -38,9 +45,6 @@ function safeGetTbodyData(tbodyId, excludeLastOpCol = true) {
     return rows;
 }
 
-/**
- * 获取动态分类数据（安全版本）
- */
 function safeGetDynamicData(containerId) {
     const result = [];
     const container = document.getElementById(containerId);
@@ -129,13 +133,14 @@ function formatMultipleSelect(values) {
 // 提交核心函数
 // ============================================================
 
-async function submitRecordToSmartSheet(webhookUrl, record) {
+async function submitRecordToSmartSheet(record) {
     try {
-        const response = await fetch(webhookUrl, {
+        const response = await fetch(NETLIFY_FUNCTION_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ add_records: [{ values: record }] })
         });
+        
         const result = await response.json();
         if (result.errcode === 0) {
             console.log('✅ 提交成功');
@@ -150,10 +155,10 @@ async function submitRecordToSmartSheet(webhookUrl, record) {
     }
 }
 
-async function batchSubmitToSmartSheet(webhookUrl, records) {
+async function batchSubmitToSmartSheet(records) {
     let success = 0, fail = 0;
     for (const record of records) {
-        const result = await submitRecordToSmartSheet(webhookUrl, record);
+        const result = await submitRecordToSmartSheet(record);
         if (result) success++;
         else fail++;
         await new Promise(resolve => setTimeout(resolve, 200));
@@ -162,7 +167,7 @@ async function batchSubmitToSmartSheet(webhookUrl, records) {
 }
 
 // ============================================================
-// 填写模式：生成记录（原有逻辑，使用 SMART_SHEET_WEBHOOK_URL）
+// 填写模式：生成记录
 // ============================================================
 
 function generateFillSmartSheetRecords() {
@@ -175,18 +180,15 @@ function generateFillSmartSheetRecords() {
     const week = document.getElementById('fillWeek')?.value || getCurrentWeekRangeText();
     const currentTimestamp = getCurrentTimestamp();
     const weekStartTimestamp = getWeekStartTimestamp(week);
-    
     const records = [];
     
     // ===== 议题一：任务闭环 =====
     const tasks = safeGetTbodyData('taskTbody', false);
     tasks.forEach(task => {
         if (!task[0] || task[0] === '') return;
-        
         let statusText = "进行", closedText = "持续中";
         if (task[3] === '✅ 已完成') { statusText = "完成"; closedText = "按时闭环"; }
         else if (task[3] === '🔴 未完成') { statusText = "流产"; closedText = "延后闭环"; }
-        
         const record = {
             "f04Gwj": weekStartTimestamp,
             "feIrbQ": filler,
@@ -204,7 +206,6 @@ function generateFillSmartSheetRecords() {
             "fT5yC0": task[4] || '',
             "fCf7VN": formatSingleSelect(closedText)
         };
-        
         Object.keys(record).forEach(key => {
             if (record[key] === null || record[key] === undefined) delete record[key];
         });
@@ -217,7 +218,6 @@ function generateFillSmartSheetRecords() {
         cat.rows.forEach(row => {
             const rowText = row.filter(v => v && v !== '').join(' | ');
             if (!rowText) return;
-            
             const record = {
                 "f04Gwj": weekStartTimestamp,
                 "feIrbQ": filler,
@@ -347,7 +347,7 @@ function generateFillSmartSheetRecords() {
 }
 
 // ============================================================
-// 填写模式：提交主函数（使用 SMART_SHEET_WEBHOOK_URL，保持不变）
+// 填写模式：提交主函数
 // ============================================================
 
 async function submitFillToSmartSheet() {
@@ -356,11 +356,6 @@ async function submitFillToSmartSheet() {
     const filler = document.getElementById('fillerName')?.value;
     if (!filler) {
         alert('❌ 请先选择填写人！');
-        return;
-    }
-    
-    if (SMART_SHEET_WEBHOOK_URL.includes('YOUR_FILL_WEBHOOK_KEY')) {
-        alert('⚠️ 请先配置填写模式的智能表格 Webhook 地址！\n\n在 smartSheetModule.js 中修改 SMART_SHEET_WEBHOOK_URL 变量。');
         return;
     }
     
@@ -380,7 +375,7 @@ async function submitFillToSmartSheet() {
         submitBtn.disabled = true;
     }
     
-    const result = await batchSubmitToSmartSheet(SMART_SHEET_WEBHOOK_URL, records);
+    const result = await batchSubmitToSmartSheet(records);
     
     if (submitBtn) {
         submitBtn.innerText = '📤 提交到智能表格';
@@ -395,7 +390,7 @@ async function submitFillToSmartSheet() {
 }
 
 // ============================================================
-// 看板模式：生成记录（独立实现，不依赖填写逻辑）
+// 看板模式：生成记录
 // ============================================================
 
 function generateDashboardSmartSheetRecords() {
@@ -410,7 +405,6 @@ function generateDashboardSmartSheetRecords() {
         let statusText = "进行", closedText = "持续中";
         if (task.actualStatus === '✅ 已完成') { statusText = "完成"; closedText = "按时闭环"; }
         else if (task.actualStatus === '🔴 未完成') { statusText = "流产"; closedText = "延后闭环"; }
-        
         const record = {
             "f04Gwj": weekStartTimestamp,
             "feIrbQ": "看板汇总",
@@ -564,16 +558,11 @@ function generateDashboardSmartSheetRecords() {
 }
 
 // ============================================================
-// 看板模式：提交主函数（使用 SMART_SHEET_WEBHOOK_URL_DASHBOARD）
+// 看板模式：提交主函数
 // ============================================================
 
 async function submitDashboardToSmartSheet() {
     console.log('✅ submitDashboardToSmartSheet 被调用了！');
-    
-    if (SMART_SHEET_WEBHOOK_URL_DASHBOARD.includes('YOUR_DASHBOARD_WEBHOOK_KEY')) {
-        alert('⚠️ 请先配置看板模式的智能表格 Webhook 地址！\n\n在 smartSheetModule.js 中修改 SMART_SHEET_WEBHOOK_URL_DASHBOARD 变量。');
-        return;
-    }
     
     const records = generateDashboardSmartSheetRecords();
     console.log('📊 看板记录数:', records.length);
@@ -591,7 +580,7 @@ async function submitDashboardToSmartSheet() {
         submitBtn.disabled = true;
     }
     
-    const result = await batchSubmitToSmartSheet(SMART_SHEET_WEBHOOK_URL_DASHBOARD, records);
+    const result = await batchSubmitToSmartSheet(records);
     
     if (submitBtn) {
         submitBtn.innerText = '📤 提交到智能表格';
@@ -606,7 +595,7 @@ async function submitDashboardToSmartSheet() {
 }
 
 // ============================================================
-// 导出到 window
+// 导出到 window（供 HTML onclick 调用）
 // ============================================================
 
 window.submitFillToSmartSheet = submitFillToSmartSheet;
