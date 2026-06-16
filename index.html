@@ -98,19 +98,16 @@
 <div class="btn-group">
     <button class="btn btn-secondary" onclick="clearFillData()">🗑️ 清空当前填写</button>
     <button class="btn btn-success" onclick="copyReportToClipboard()" id="copyReportBtn">📋 复制汇报文本</button>
-    <button class="btn btn-primary" onclick="submitToSmartSheet()" id="submitToSheetBtn" style="background: #2c6e9e;">📤 提交到智能表格</button>
+    <button class="btn btn-primary" onclick="submitFillToSmartSheet()" id="submitToSheetBtn" style="background: #2c6e9e;">📤 提交到智能表格</button>
     <button class="btn btn-warning btn-sm" onclick="exportFillData()" style="background:#e2e8f0; color:#5c6f87;">📎 导出JSON</button>
 </div>
-<div class="footer-note">💡 <strong>填写流程：</strong> 选择姓名 → 自动加载任务 → 填写完成情况 → 添加各议题数据 → 点击【📋 复制汇报文本】→ 到企业微信粘贴发送给汇总人（何锦仪）<br>版本v0.6 制作by 何锦仪</div>
+<div class="footer-note">💡 <strong>填写流程：</strong> 选择姓名 → 自动加载任务 → 填写完成情况 → 添加各议题数据 → 点击「📤 提交到智能表格」<br>版本v0.8 制作by 何锦仪</div>
 </div>
 
 <!-- ========== 模式3：议题看板 ========== -->
 <div id="dashboardPanel" class="mode-panel">
-<div class="info-bar">
-<div class="info-item"><span class="info-label">📊 看板周次：</span><span id="dashboardWeekLabel" style="font-weight:600;"></span></div>
-</div>
 <div id="dashboardContainer"></div>
-<div class="footer-note">📋 电气周会议题看板（双击单元格可编辑，导出JSON保存）</div>
+<div class="footer-note">📋 电气周会议题看板（双击单元格可编辑）</div>
 </div>
 
 </div>

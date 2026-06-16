@@ -1,4 +1,4 @@
-// ==================== 看板渲染模块（可编辑 + 导出JSON） ====================
+// ==================== 看板渲染模块（可编辑 + 导出JSON + 提交智能表格） ====================
 
 // 全局图表实例变量
 let _chartInstance = null;
@@ -21,9 +21,26 @@ function renderDashboard() {
     if (weekLabelElem) weekLabelElem.innerText = weekLabel;
     
     let html = `
+        <!-- ====== 看板顶部信息栏（与填写系统保持一致） ====== -->
+        <div class="info-bar">
+            <div class="info-item">
+                <span class="info-label">📊 看板周次：</span>
+                <span style="font-weight:600;">${weekLabel}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">📝 数据条数：</span>
+                <span style="font-weight:600;">${countTotalRecords()}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🔄 最后更新：</span>
+                <span style="font-weight:600;">${new Date().toLocaleString('zh-CN')}</span>
+            </div>
+        </div>
+        
+        <!-- ====== 编辑提示 ====== -->
         <div class="copy-tip" style="margin-bottom: 16px;">
-            <span></span>
-            <span><strong>提示：</strong> 看板中的表格内容可以直接双击编辑，修改后点击导出按钮保存数据。</span>
+            <span>✏️</span>
+            <span><strong>提示：</strong> 看板中的表格内容可以直接双击编辑，修改后点击右下角「导出JSON」或「提交到智能表格」保存数据。</span>
         </div>
     `;
     
@@ -49,7 +66,7 @@ function renderDashboard() {
         html += `<div class="chart-card"><div class="chart-row"><div class="chart-box"><canvas id="closureChartCanvas" width="400" height="200" style="max-width:100%"></canvas></div>
         <div class="stats-badge"><div class="stat-item"><div class="stat-num">${completedAll}/${totalAll}</div><div class="stat-label">闭环任务数/总任务数</div></div>
         <div class="stat-item"><div class="stat-num">${rate}%</div><div class="stat-label">整体闭环率</div></div></div></div></div>
-        <div class="dashboard-card"><div class="dashboard-title"> 任务闭环清单</div>
+        <div class="dashboard-card"><div class="dashboard-title">📋 任务闭环清单</div>
         <table id="dashboardTaskTable" class="editable-table"><thead><tr><th>上周任务</th><th>提出周次</th><th>预计完成时间</th><th>实际完成情况</th><th>完成情况说明</th><th>负责人</th><th style="width:50px">操作</th></tr></thead><tbody>`;
         
         tasks.forEach((t, idx) => {
@@ -85,7 +102,7 @@ function renderDashboard() {
             if (!cat.rows || cat.rows.length === 0) continue;
             html += `<div class="dashboard-card" data-category-idx="${catIdx}">
                 <div class="dashboard-title" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span> ${cat.category}</span>
+                    <span>📌 ${cat.category}</span>
                     <button class="btn-danger-icon" onclick="deleteOrgCategory(${catIdx})">删除分类</button>
                 </div>
                 <table class="editable-table"><thead><tr>`;
@@ -112,7 +129,7 @@ function renderDashboard() {
     const compliance = dashboardData.compliance || [];
     html += `<div class="section-title" onclick="toggleTemplate('template_proc_dash')">议题三：机制流程/信息安全/质量合规 <span class="template-hint">点击查看模板</span></div>
         <div id="template_proc_dash" class="template-content">${templates.compliance.template.replace(/\n/g, '<br>')}</div>
-        <div class="dashboard-card"><div class="dashboard-title"> 机制流程事项</div>
+        <div class="dashboard-card"><div class="dashboard-title">📋 机制流程事项</div>
         <table id="dashboardComplianceTable" class="editable-table"><thead><tr><th>事项</th><th>当前状态</th><th>本周进展</th><th>下一步计划</th><th>负责人</th><th>完成时间</th><th style="width:50px">操作</th></tr></thead><tbody>`;
     
     compliance.forEach((item, idx) => {
@@ -141,7 +158,7 @@ function renderDashboard() {
             if (!cat.rows || cat.rows.length === 0) continue;
             html += `<div class="dashboard-card" data-biz-idx="${catIdx}">
                 <div class="dashboard-title" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span> ${cat.category}</span>
+                    <span>📌 ${cat.category}</span>
                     <button class="btn-danger-icon" onclick="deleteBizCategory(${catIdx})">删除分类</button>
                 </div>
                 <table class="editable-table"><thead><tr>`;
@@ -168,7 +185,7 @@ function renderDashboard() {
     const decisions = dashboardData.decision || [];
     html += `<div class="section-title" onclick="toggleTemplate('template_dec_dash')">议题五：共同决策 <span class="template-hint">点击查看模板</span></div>
         <div id="template_dec_dash" class="template-content">${templates.decision.template.replace(/\n/g, '<br>')}</div>
-        <div class="dashboard-card"><div class="dashboard-title"> 共同决策事项</div>
+        <div class="dashboard-card"><div class="dashboard-title">📋 共同决策事项</div>
         <table id="dashboardDecisionTable" class="editable-table"><thead><tr><th>决策事项</th><th>背景/选项逻辑</th><th>建议方案</th><th style="width:50px">操作</th></tr></thead><tbody>`;
     
     decisions.forEach((dec, idx) => {
@@ -187,7 +204,7 @@ function renderDashboard() {
     const others = dashboardData.other || [];
     html += `<div class="section-title" onclick="toggleTemplate('template_other_dash')">议题六：其他 <span class="template-hint">点击查看模板</span></div>
         <div id="template_other_dash" class="template-content">${templates.other.template.replace(/\n/g, '<br>')}</div>
-        <div class="dashboard-card"><div class="dashboard-title"> 其他事项</div>
+        <div class="dashboard-card"><div class="dashboard-title">📋 其他事项</div>
         <table id="dashboardOtherTable" class="editable-table"><thead><tr><th>事项</th><th>说明</th><th>建议</th><th>提出人</th><th style="width:50px">操作</th></tr></thead><tbody>`;
     
     others.forEach((other, idx) => {
@@ -203,11 +220,11 @@ function renderDashboard() {
     <button class="btn btn-secondary btn-sm" style="margin-top: 8px;" onclick="addOtherItem()">+ 添加事项</button>
     </div>`;
     
+    // ====== 底部操作按钮（与填写系统保持一致，放在右下角） ======
     html += `
-        <div class="floating-action-panel">
-            <button class="btn btn-primary" onclick="exportDashboardToJSON()" style="background: #2e7d5e;">导出看板为JSON</button>
-            <button class="btn btn-secondary" onclick="resetDashboardData()">重置看板数据</button>
-        </div>
+        <div class="btn-group">
+            <button class="btn btn-secondary" onclick="exportDashboardToJSON()">📥 导出JSON</button>
+            <button class="btn btn-primary" onclick="submitDashboardToSmartSheet()" id="submitDashboardToSheetBtn" style="background: #2c6e9e;">📤 提交到智能表格</button>        </div>
     `;
     
     container.innerHTML = html;
@@ -219,6 +236,20 @@ function renderDashboard() {
     setTimeout(() => {
         renderClosureChart(ownerMap, tasks.length);
     }, 50);
+}
+
+/**
+ * 统计看板中的数据总条数
+ */
+function countTotalRecords() {
+    let count = 0;
+    count += (dashboardData.task_closed || []).length;
+    (dashboardData.org_dynamic || []).forEach(cat => { count += (cat.rows || []).length; });
+    count += (dashboardData.compliance || []).length;
+    (dashboardData.biz_dynamic || []).forEach(cat => { count += (cat.rows || []).length; });
+    count += (dashboardData.decision || []).length;
+    count += (dashboardData.other || []).length;
+    return count;
 }
 
 /**
@@ -273,7 +304,6 @@ function handleCellEdit(e) {
             const fieldName = fields[colIndex];
             if (fieldName && fieldName !== null) {
                 dashboardData.task_closed[idx][fieldName] = newValue;
-                // 如果修改的是实际完成情况，同步更新 completed 状态
                 if (fieldName === 'actualStatus') {
                     dashboardData.task_closed[idx].completed = newValue === '✅ 已完成';
                 }
@@ -350,14 +380,298 @@ function handleStatusChange(e) {
 }
 
 /**
+ * 从看板数据生成智能表格记录（复用 smartSheetModule 的生成逻辑）
+ */
+function generateDashboardSmartSheetRecords() {
+    const week = getCurrentWeekRangeText();
+    const currentTimestamp = Date.now().toString();
+    const weekStartTimestamp = getWeekStartTimestamp(week);
+    
+    const records = [];
+    
+    // ========== 议题一：任务闭环 ==========
+    (dashboardData.task_closed || []).forEach(task => {
+        if (!task.task || task.task === '') return;
+        
+        let statusText = "进行";
+        let closedText = "持续中";
+        if (task.actualStatus === '✅ 已完成') {
+            statusText = "完成";
+            closedText = "按时闭环";
+        } else if (task.actualStatus === '🔴 未完成') {
+            statusText = "流产";
+            closedText = "延后闭环";
+        }
+        
+        const record = {
+            "f04Gwj": weekStartTimestamp,
+            "feIrbQ": "看板汇总",
+            "ftQMc5": formatSingleSelect("看板汇总"),
+            "ftk5Tx": formatMultipleSelect(["看板汇总"]),
+            "fw44LP": formatMultipleSelect([task.owner || "看板汇总"]),
+            "fF4gP2": formatSingleSelect("上周任务闭环回顾"),
+            "f1iUUp": "任务闭环",
+            "fhtXVm": task.task,
+            "fszX2I": formatMultipleSelect([task.owner || "看板汇总"]),
+            "fNhjT1": formatSingleSelect(statusText),
+            "foplAb": currentTimestamp,
+            "flABgk": parseDateToTimestamp(task.expectDate),
+            "fprFhL": task.statusDetail ? currentTimestamp : null,
+            "fT5yC0": task.statusDetail || '',
+            "fCf7VN": formatSingleSelect(closedText)
+        };
+        
+        Object.keys(record).forEach(key => {
+            if (record[key] === null || record[key] === undefined) {
+                delete record[key];
+            }
+        });
+        records.push(record);
+    });
+    
+    // ========== 议题二：组织人才 ==========
+    (dashboardData.org_dynamic || []).forEach(cat => {
+        (cat.rows || []).forEach(row => {
+            const rowText = Object.values(row).filter(v => v && v !== '').join(' | ');
+            if (!rowText) return;
+            
+            const record = {
+                "f04Gwj": weekStartTimestamp,
+                "feIrbQ": "看板汇总",
+                "ftQMc5": formatSingleSelect("看板汇总"),
+                "ftk5Tx": formatMultipleSelect(["看板汇总"]),
+                "fw44LP": formatMultipleSelect(["看板汇总"]),
+                "fF4gP2": formatSingleSelect("组织人才建设"),
+                "f1iUUp": cat.category,
+                "fhtXVm": rowText.substring(0, 500),
+                "fszX2I": formatMultipleSelect(["看板汇总"]),
+                "fNhjT1": formatSingleSelect("进行"),
+                "foplAb": currentTimestamp,
+                "fT5yC0": rowText,
+                "fCf7VN": formatSingleSelect("持续中")
+            };
+            Object.keys(record).forEach(key => {
+                if (record[key] === null || record[key] === undefined) {
+                    delete record[key];
+                }
+            });
+            records.push(record);
+        });
+    });
+    
+    // ========== 议题三：机制流程 ==========
+    (dashboardData.compliance || []).forEach(item => {
+        if (!item.事项 || item.事项 === '') return;
+        
+        const record = {
+            "f04Gwj": weekStartTimestamp,
+            "feIrbQ": "看板汇总",
+            "ftQMc5": formatSingleSelect("看板汇总"),
+            "ftk5Tx": formatMultipleSelect(["看板汇总"]),
+            "fw44LP": formatMultipleSelect([item.负责人 || "看板汇总"]),
+            "fF4gP2": formatSingleSelect("机制流程/信息安全/质量合规"),
+            "f1iUUp": "机制流程",
+            "fhtXVm": item.事项,
+            "fszX2I": formatMultipleSelect([item.负责人 || "看板汇总"]),
+            "fNhjT1": formatSingleSelect(item.当前状态 === '完成' ? '完成' : '进行'),
+            "foplAb": currentTimestamp,
+            "flABgk": parseDateToTimestamp(item.完成时间),
+            "fT5yC0": item.本周进展 || '',
+            "fCf7VN": formatSingleSelect(item.当前状态 === '完成' ? '按时闭环' : '持续中')
+        };
+        Object.keys(record).forEach(key => {
+            if (record[key] === null || record[key] === undefined) {
+                delete record[key];
+            }
+        });
+        records.push(record);
+    });
+    
+    // ========== 议题四：具体业务 ==========
+    (dashboardData.biz_dynamic || []).forEach(cat => {
+        (cat.rows || []).forEach(row => {
+            const rowText = Object.values(row).filter(v => v && v !== '').join(' | ');
+            if (!rowText) return;
+            
+            const record = {
+                "f04Gwj": weekStartTimestamp,
+                "feIrbQ": "看板汇总",
+                "ftQMc5": formatSingleSelect("看板汇总"),
+                "ftk5Tx": formatMultipleSelect(["看板汇总"]),
+                "fw44LP": formatMultipleSelect(["看板汇总"]),
+                "fF4gP2": formatSingleSelect("具体项目业务"),
+                "f1iUUp": cat.category,
+                "fhtXVm": rowText.substring(0, 500),
+                "fszX2I": formatMultipleSelect(["看板汇总"]),
+                "fNhjT1": formatSingleSelect("进行"),
+                "foplAb": currentTimestamp,
+                "fT5yC0": rowText,
+                "fCf7VN": formatSingleSelect("持续中")
+            };
+            Object.keys(record).forEach(key => {
+                if (record[key] === null || record[key] === undefined) {
+                    delete record[key];
+                }
+            });
+            records.push(record);
+        });
+    });
+    
+    // ========== 议题五：共同决策 ==========
+    (dashboardData.decision || []).forEach(dec => {
+        if (!dec.决策事项 || dec.决策事项 === '') return;
+        
+        const record = {
+            "f04Gwj": weekStartTimestamp,
+            "feIrbQ": "看板汇总",
+            "ftQMc5": formatSingleSelect("看板汇总"),
+            "ftk5Tx": formatMultipleSelect(["看板汇总"]),
+            "fw44LP": formatMultipleSelect(["看板汇总"]),
+            "fF4gP2": formatSingleSelect("其他"),
+            "f1iUUp": "共同决策",
+            "fhtXVm": dec.决策事项,
+            "fNhjT1": formatSingleSelect("进行"),
+            "foplAb": currentTimestamp,
+            "fT5yC0": `背景：${dec.背景选项逻辑 || ''} | 建议：${dec.建议方案 || ''}`,
+            "fCf7VN": formatSingleSelect("持续中")
+        };
+        Object.keys(record).forEach(key => {
+            if (record[key] === null || record[key] === undefined) {
+                delete record[key];
+            }
+        });
+        records.push(record);
+    });
+    
+    // ========== 议题六：其他 ==========
+    (dashboardData.other || []).forEach(other => {
+        if (!other.事项 || other.事项 === '') return;
+        
+        const record = {
+            "f04Gwj": weekStartTimestamp,
+            "feIrbQ": "看板汇总",
+            "ftQMc5": formatSingleSelect("看板汇总"),
+            "ftk5Tx": formatMultipleSelect(["看板汇总"]),
+            "fw44LP": formatMultipleSelect([other.提出人 || "看板汇总"]),
+            "fF4gP2": formatSingleSelect("其他"),
+            "f1iUUp": "其他事项",
+            "fhtXVm": other.事项,
+            "fszX2I": formatMultipleSelect([other.提出人 || "看板汇总"]),
+            "fNhjT1": formatSingleSelect("进行"),
+            "foplAb": currentTimestamp,
+            "fT5yC0": `说明：${other.说明 || ''} | 建议：${other.建议 || ''}`,
+            "fCf7VN": formatSingleSelect("持续中")
+        };
+        Object.keys(record).forEach(key => {
+            if (record[key] === null || record[key] === undefined) {
+                delete record[key];
+            }
+        });
+        records.push(record);
+    });
+    
+    return records;
+}
+
+/**
+ * 获取周次对应的周一日期时间戳
+ */
+function getWeekStartTimestamp(week) {
+    const weekMatch = week.match(/\((\d+)\/(\d+)-/);
+    if (weekMatch) {
+        const month = parseInt(weekMatch[1]);
+        const day = parseInt(weekMatch[2]);
+        const currentYear = new Date().getFullYear();
+        const weekStartDate = new Date(currentYear, month - 1, day);
+        if (!isNaN(weekStartDate.getTime())) {
+            return weekStartDate.getTime().toString();
+        }
+    }
+    return Date.now().toString();
+}
+
+/**
+ * 格式化单选字段
+ */
+function formatSingleSelect(value) {
+    if (!value) return null;
+    return [{ text: value }];
+}
+
+/**
+ * 格式化多选字段
+ */
+function formatMultipleSelect(values) {
+    if (!values || values.length === 0) return null;
+    const validValues = values.filter(v => v && v !== '');
+    if (validValues.length === 0) return null;
+    return validValues.map(v => ({ text: v }));
+}
+
+/**
+ * 解析日期字符串为时间戳
+ */
+function parseDateToTimestamp(dateStr) {
+    if (!dateStr || dateStr === '持续跟进' || dateStr === '本周' || dateStr === '') {
+        return null;
+    }
+    let date = new Date();
+    const currentYear = date.getFullYear();
+    let parts = dateStr.split('/');
+    if (parts.length === 2) {
+        date = new Date(currentYear, parseInt(parts[0]) - 1, parseInt(parts[1]));
+    } else if (parts.length === 3) {
+        date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    } else {
+        return null;
+    }
+    if (isNaN(date.getTime())) return null;
+    return date.getTime().toString();
+}
+
+/**
+ * 提交看板数据到智能表格
+ */
+async function submitDashboardToSmartSheet() {
+    if (SMART_SHEET_WEBHOOK_URL_DASHBOARD.includes('YOUR_WEBHOOK_KEY')) {
+        alert('⚠️ 请先配置智能表格 Webhook 地址！\n\n在 smartSheetModule.js 中修改 SMART_SHEET_WEBHOOK_URL_DASHBOARD 变量。');
+        return;
+    }
+    
+    const records = generateDashboardSmartSheetRecords();
+    
+    if (records.length === 0) {
+        alert('⚠️ 没有可提交的数据！');
+        return;
+    }
+    
+    if (!confirm(`即将提交 ${records.length} 条记录到智能表格，确认提交吗？`)) return;
+    
+    const submitBtn = document.getElementById('submitDashboardToSheetBtn');
+    const originalText = submitBtn.innerText;
+    submitBtn.innerText = '⏳ 提交中...';
+    submitBtn.disabled = true;
+    
+    const result = await batchSubmitToSmartSheet(records);
+    
+    submitBtn.innerText = originalText;
+    submitBtn.disabled = false;
+    
+    if (result.fail === 0) {
+        alert(`✅ 全部提交成功！共 ${result.success} 条记录已写入智能表格。`);
+    } else {
+        alert(`⚠️ 提交完成：成功 ${result.success} 条，失败 ${result.fail} 条。\n请检查网络或联系管理员。`);
+    }
+}
+
+/**
  * 导出看板数据为JSON文件
  */
 function exportDashboardToJSON() {
-    // 更新 dashboardData 的元数据
     dashboardData.meta = {
         week: getCurrentWeekRangeText(),
         lastUpdated: new Date().toISOString(),
-        exportedBy: document.getElementById('fillerName')?.value || '未知'
+        exportedBy: '看板导出'
     };
     
     const jsonStr = JSON.stringify(dashboardData, null, 2);
@@ -371,7 +685,7 @@ function exportDashboardToJSON() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    alert('✅ 看板数据已导出为JSON文件！\n');
+    alert('✅ 看板数据已导出为JSON文件！');
 }
 
 /**

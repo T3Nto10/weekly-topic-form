@@ -22,6 +22,10 @@ window.clearFillData = clearFillData;
 window.exportFillData = exportFillData;
 window.copyReportToClipboard = copyReportToClipboard;
 window.submitToSmartSheet = submitToSmartSheet;
+window.submitFillToSmartSheet = submitFillToSmartSheet;
+window.submitDashboardToSmartSheet = submitDashboardToSmartSheet;
+window.exportDashboardToJSON = exportDashboardToJSON;
+window.resetDashboardData = resetDashboardData;
 
 // 看板相关函数（可编辑）
 window.exportDashboardToJSON = exportDashboardToJSON;
