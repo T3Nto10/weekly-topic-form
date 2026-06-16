@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企微智能表格 Webhook 测试工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: #f0f2f5; 
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 8px; color: #1e4663; }
+        h2 { font-size: 1rem; margin: 20px 0 10px; color: #2c6e9e; }
+        h3 { font-size: 0.9rem; margin: 16px 0 8px; color: #5c6f87; }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbdde9;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        textarea { height: 280px; resize: vertical; }
+        button {
+            padding: 10px 20px;
+            margin-top: 12px;
+            margin-right: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .btn-primary { background: #2c6e9e; color: white; }
+        .btn-secondary { background: #e2e8f0; color: #1e4663; }
+        .btn-success { background: #2e7d5e; color: white; }
+        .result-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+        .success { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .info { color: #569cd6; }
+        hr { margin: 20px 0; border-color: #e2e8f0; }
+        .field-note {
+            background: #f8fafd;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: #5c6f87;
+            margin-top: 16px;
+        }
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        .status.loading { background: #fff3e0; color: #7d6608; }
+        .status.success { background: #e8f5e9; color: #2e7d5e; }
+        .status.error { background: #ffebee; color: #c0392b; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📡 企业微信智能表格 Webhook 测试工具</h1>
+    <p style="color: #5c6f87; margin-bottom: 20px;">严格按照企微示例格式发送请求，测试字段映射是否正确</p>
+    
+    <hr>
+    
+    <h2>🔗 1. Webhook 地址</h2>
+    <input type="text" id="webhookUrl" placeholder="粘贴你的 Webhook URL" 
+           value="https://qyapi.weixin.qq.com/cgi-bin/wedoc/smartsheet/webhook?key=">
+    
+    <h2>📝 2. 请求体（JSON 格式）</h2>
+    <textarea id="requestBody">{
+  "add_records": [
+    {
+      "values": {
+        "f04Gwj": "测试时间 2026-06-16",
+        "feIrbQ": "测试提交人",
+        "ftQMc5": [
+          {
+            "text": "关雪丹"
+          }
+        ],
+        "ftk5Tx": [
+          {
+            "text": "徐斌"
+          },
+          {
+            "text": "关雪丹"
+          }
+        ],
+        "fw44LP": [
+          {
+            "text": "梁志强 Mark(zhiqiang.liang)"
+          },
+          {
+            "text": "关雪丹(xuedan.guan)"
+          }
+        ],
+        "fF4gP2": [
+          {
+            "text": "上周任务闭环回顾"
+          }
+        ],
+        "f1iUUp": "测试议题子类",
+        "fhtXVm": "这是测试议题内容，请检查是否成功写入智能表格",
+        "fszX2I": [
+          {
+            "text": "关雪丹(xuedan.guan)"
+          },
+          {
+            "text": "何锦仪(jinyi.he)"
+          }
+        ],
+        "fNhjT1": [
+          {
+            "text": "进行"
+          }
+        ],
+        "foplAb": "1735660800000",
+        "flABgk": "1735660800000",
+        "fprFhL": "1735660800000",
+        "fT5yC0": "测试完成情况说明",
+        "fCf7VN": [
+          {
+            "text": "按时闭环"
+          }
+        ]
+      }
+    }
+  ]
+}</textarea>
+    
+    <div>
+        <button class="btn-primary" onclick="sendRequest()">🚀 发送测试请求</button>
+        <button class="btn-secondary" onclick="resetForm()">🔄 重置</button>
+        <button class="btn-secondary" onclick="clearResult()">🗑️ 清空结果</button>
+    </div>
+    
+    <h2>📤 3. 响应结果</h2>
+    <div id="resultStatus"></div>
+    <div id="resultContent" class="result-box">等待发送请求...</div>
+    
+    <hr>
+    
+    <h2>📋 字段映射说明（基于你的 schema）</h2>
+    <div class="field-note">
+        <table style="width:100%; font-size:0.7rem; text-align:left;">
+            <thead><tr style="background:#eef3fc;"><th>字段ID</th><th>字段名</th><th>类型</th><th>示例值</th></tr></thead>
+            <tbody>
+                <tr><td>f04Gwj</td><td>时间</td><td>text</td><td>"测试文本"</td></tr>
+                <tr><td>feIrbQ</td><td>提交人</td><td>text</td><td>"测试文本"</td></tr>
+                <tr><td>ftQMc5</td><td>组织人</td><td>single_select</td><td>[{"text": "关雪丹"}]</td></tr>
+                <tr><td>ftk5Tx</td><td>参会人</td><td>multiple_select</td><td>[{"text": "徐斌"}, {"text": "关雪丹"}]</td></tr>
+                <tr><td>fw44LP</td><td>提出人</td><td>multiple_select</td><td>[{"text": "梁志强 Mark(zhiqiang.liang)"}]</td></tr>
+                <tr><td>fF4gP2</td><td>议题类型</td><td>single_select</td><td>[{"text": "上周任务闭环回顾"}]</td></tr>
+                <tr><td>f1iUUp</td><td>议题子类</td><td>text</td><td>"测试文本"</td></tr>
+                <tr><td>fhtXVm</td><td>议题内容</td><td>text</td><td>"测试文本"</td></tr>
+                <tr><td>fszX2I</td><td>负责人</td><td>multiple_select</td><td>[{"text": "关雪丹(xuedan.guan)"}]</td></tr>
+                <tr><td>fNhjT1</td><td>议题状态</td><td>single_select</td><td>[{"text": "进行"}]</td></tr>
+                <tr><td>foplAb</td><td>提出时间</td><td>date_time</td><td>"1735660800000"</td></tr>
+                <tr><td>flABgk</td><td>预计完成</td><td>date_time</td><td>"1735660800000"</td></tr>
+                <tr><td>fprFhL</td><td>实际完成</td><td>date_time</td><td>"1735660800000"</td></tr>
+                <tr><td>fT5yC0</td><td>完成情况说明</td><td>text</td><td>"测试文本"</td></tr>
+                <tr><td>fCf7VN</td><td>是否按预期闭环</td><td>single_select</td><td>[{"text": "按时闭环"}]</td></tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="field-note">
+        💡 <strong>提示：</strong><br>
+        - 日期字段使用毫秒时间戳字符串格式，如 "1735660800000"<br>
+        - 单选/多选字段使用 [{"text": "选项值"}] 格式，选项值必须与枚举值完全匹配<br>
+        - 文本字段直接使用字符串值
+    </div>
+</div>
+
+<script>
+    async function sendRequest() {
+        const webhookUrl = document.getElementById('webhookUrl').value.trim();
+        const requestBody = document.getElementById('requestBody').value;
+        
+        if (!webhookUrl) {
+            showStatus('error', '❌ 请先粘贴 Webhook 地址！');
+            return;
+        }
+        
+        if (!requestBody) {
+            showStatus('error', '❌ 请填写请求体！');
+            return;
+        }
+        
+        let bodyJson;
+        try {
+            bodyJson = JSON.parse(requestBody);
+        } catch(e) {
+            showStatus('error', `❌ JSON 格式错误：${e.message}`);
+            return;
+        }
+        
+        showStatus('loading', '⏳ 正在发送请求...');
+        document.getElementById('resultContent').innerHTML = '发送中...';
+        
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bodyJson)
+            });
+            
+            const result = await response.json();
+            
+            // 美化显示结果
+            const resultHtml = `<span class="info">状态码: ${response.status}</span><br><br>` +
+                              JSON.stringify(result, null, 2);
+            document.getElementById('resultContent').innerHTML = resultHtml;
+            
+            if (result.errcode === 0) {
+                showStatus('success', `✅ 成功！errcode: ${result.errcode}, errmsg: ${result.errmsg || 'ok'}`);
+            } else {
+                showStatus('error', `❌ 失败！errcode: ${result.errcode}, errmsg: ${result.errmsg || '未知错误'}`);
+            }
+        } catch (error) {
+            showStatus('error', `❌ 网络错误：${error.message}`);
+            document.getElementById('resultContent').innerHTML = error.message;
+        }
+    }
+    
+    function showStatus(type, message) {
+        const statusDiv = document.getElementById('resultStatus');
+        statusDiv.className = `status ${type}`;
+        statusDiv.innerHTML = message;
+    }
+    
+    function resetForm() {
+        document.getElementById('webhookUrl').value = 'https://qyapi.weixin.qq.com/cgi-bin/wedoc/smartsheet/webhook?key=';
+        document.getElementById('requestBody').value = `{
+  "add_records": [
+    {
+      "values": {
+        "f04Gwj": "测试时间 2026-06-16",
+        "feIrbQ": "测试提交人",
+        "ftQMc5": [
+          {
+            "text": "关雪丹"
+          }
+        ],
+        "ftk5Tx": [
+          {
+            "text": "徐斌"
+          },
+          {
+            "text": "关雪丹"
+          }
+        ],
+        "fw44LP": [
+          {
+            "text": "梁志强 Mark(zhiqiang.liang)"
+          },
+          {
+            "text": "关雪丹(xuedan.guan)"
+          }
+        ],
+        "fF4gP2": [
+          {
+            "text": "上周任务闭环回顾"
+          }
+        ],
+        "f1iUUp": "测试议题子类",
+        "fhtXVm": "这是测试议题内容，请检查是否成功写入智能表格",
+        "fszX2I": [
+          {
+            "text": "关雪丹(xuedan.guan)"
+          },
+          {
+            "text": "何锦仪(jinyi.he)"
+          }
+        ],
+        "fNhjT1": [
+          {
+            "text": "进行"
+          }
+        ],
+        "foplAb": "1735660800000",
+        "flABgk": "1735660800000",
+        "fprFhL": "1735660800000",
+        "fT5yC0": "测试完成情况说明",
+        "fCf7VN": [
+          {
+            "text": "按时闭环"
+          }
+        ]
+      }
+    }
+  ]
+}`;
+        clearResult();
+    }
+    
+    function clearResult() {
+        document.getElementById('resultStatus').innerHTML = '';
+        document.getElementById('resultContent').innerHTML = '等待发送请求...';
+    }
+</script>
+</body>
+</html>
