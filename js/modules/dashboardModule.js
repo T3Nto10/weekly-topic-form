@@ -1,5 +1,48 @@
 // ==================== 看板渲染模块（可编辑 + 导出JSON + 提交智能表格） ====================
+// ==================== 看板表格样式修复 ====================
+// 确保完成情况说明列自动换行
 
+(function injectDashboardStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        /* 看板表格单元格自动换行 */
+        .dashboard-card .editable-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        .dashboard-card .editable-table td.editable-cell {
+            word-wrap: break-word;
+            white-space: normal;
+            max-width: 280px;
+            min-width: 80px;
+            vertical-align: top;
+            padding: 6px 10px;
+        }
+        /* 完成情况说明列（第5列）更宽 */
+        .dashboard-card #dashboardTaskTable td:nth-child(5) {
+            max-width: 350px;
+            min-width: 150px;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+        /* 状态下拉框列紧凑 */
+        .dashboard-card #dashboardTaskTable td:nth-child(4) {
+            max-width: 120px;
+            min-width: 80px;
+        }
+        .dashboard-card #dashboardTaskTable th,
+        .dashboard-card #dashboardTaskTable td {
+            overflow: hidden;
+        }
+        .dashboard-card #dashboardTaskTable td select {
+            width: 100%;
+            max-width: 110px;
+            font-size: 12px;
+            padding: 2px 4px;
+        }
+    `;
+    document.head.appendChild(style);
+})();
 // 全局图表实例变量
 let _chartInstance = null;
 
@@ -125,19 +168,17 @@ function renderDashboard() {
     }
     html += `<button class="btn btn-secondary" style="margin: 8px 0;" onclick="addOrgCategory()">+ 添加组织人才分类</button>`;
     
-    // ========== 议题三：机制流程 ==========
+    // ========== 议题三：机制流程/信息安全/质量合规 ==========
     const compliance = dashboardData.compliance || [];
     html += `<div class="section-title" onclick="toggleTemplate('template_proc_dash')">议题三：机制流程/信息安全/质量合规 <span class="template-hint">点击查看模板</span></div>
         <div id="template_proc_dash" class="template-content">${templates.compliance.template.replace(/\n/g, '<br>')}</div>
         <div class="dashboard-card"><div class="dashboard-title">📋 机制流程事项</div>
-        <table id="dashboardComplianceTable" class="editable-table"><thead><tr><th>事项</th><th>当前状态</th><th>本周进展</th><th>下一步计划</th><th>负责人</th><th>完成时间</th><th style="width:50px">操作</th></tr></thead><tbody>`;
+        <table id="dashboardComplianceTable" class="editable-table"><thead><tr><th>事项</th><th>计划说明</th><th>负责人</th><th>完成时间</th><th style="width:50px">操作</th></tr></thead><tbody>`;
     
     compliance.forEach((item, idx) => {
         html += `<tr data-idx="${idx}">
             <td contenteditable="true" class="editable-cell">${escapeHtml(item.事项 || '')}</td>
-            <td contenteditable="true" class="editable-cell">${escapeHtml(item.当前状态 || '')}</td>
-            <td contenteditable="true" class="editable-cell">${escapeHtml(item.本周进展 || '')}</td>
-            <td contenteditable="true" class="editable-cell">${escapeHtml(item.下一步计划 || '')}</td>
+            <td contenteditable="true" class="editable-cell">${escapeHtml(item.计划说明 || '')}</td>
             <td contenteditable="true" class="editable-cell">${escapeHtml(item.负责人 || '')}</td>
             <td contenteditable="true" class="editable-cell">${escapeHtml(item.完成时间 || '')}</td>
             <td><button class="btn-danger-icon" onclick="deleteComplianceItem(${idx})">删除</button></td>
@@ -220,11 +261,13 @@ function renderDashboard() {
     <button class="btn btn-secondary btn-sm" style="margin-top: 8px;" onclick="addOtherItem()">+ 添加事项</button>
     </div>`;
     
-    // ====== 底部操作按钮（与填写系统保持一致，放在右下角） ======
+    // ====== 底部操作按钮 ======
     html += `
         <div class="btn-group">
             <button class="btn btn-secondary" onclick="exportDashboardToJSON()">📥 导出JSON</button>
-            <button class="btn btn-primary" onclick="submitDashboardToSmartSheet()" id="submitDashboardToSheetBtn" style="background: #2c6e9e;">📤 提交到智能表格</button>        </div>
+            <button class="btn btn-secondary" onclick="showImportDialog()" style="background: #27ae60; color: white;">📥 导入数据</button>
+            <button class="btn btn-primary" onclick="submitDashboardToSmartSheet()" id="submitDashboardToSheetBtn" style="background: #2c6e9e;">📤 提交到智能表格</button>
+        </div>
     `;
     
     container.innerHTML = html;
@@ -332,7 +375,7 @@ function handleCellEdit(e) {
     if (tableId === 'dashboardComplianceTable') {
         const idx = parseInt(row.getAttribute('data-idx'));
         if (!isNaN(idx) && dashboardData.compliance[idx]) {
-            const fields = ['事项', '当前状态', '本周进展', '下一步计划', '负责人', '完成时间'];
+            const fields = ['事项', '计划说明', '负责人', '完成时间'];
             const colIndex = cell.cellIndex;
             if (fields[colIndex]) {
                 dashboardData.compliance[idx][fields[colIndex]] = newValue;
@@ -380,7 +423,7 @@ function handleStatusChange(e) {
 }
 
 /**
- * 从看板数据生成智能表格记录（复用 smartSheetModule 的生成逻辑）
+ * 从看板数据生成智能表格记录
  */
 function generateDashboardSmartSheetRecords() {
     const week = getCurrentWeekRangeText();
@@ -473,11 +516,11 @@ function generateDashboardSmartSheetRecords() {
             "f1iUUp": "机制流程",
             "fhtXVm": item.事项,
             "fszX2I": formatMultipleSelect([item.负责人 || "看板汇总"]),
-            "fNhjT1": formatSingleSelect(item.当前状态 === '完成' ? '完成' : '进行'),
+            "fNhjT1": formatSingleSelect("进行"),
             "foplAb": currentTimestamp,
             "flABgk": parseDateToTimestamp(item.完成时间),
-            "fT5yC0": item.本周进展 || '',
-            "fCf7VN": formatSingleSelect(item.当前状态 === '完成' ? '按时闭环' : '持续中')
+            "fT5yC0": item.计划说明 || '',
+            "fCf7VN": formatSingleSelect("持续中")
         };
         Object.keys(record).forEach(key => {
             if (record[key] === null || record[key] === undefined) {
@@ -633,12 +676,10 @@ function parseDateToTimestamp(dateStr) {
  * 提交看板数据到智能表格
  */
 async function submitDashboardToSmartSheet() {
-    if (SMART_SHEET_WEBHOOK_URL_DASHBOARD.includes('YOUR_WEBHOOK_KEY')) {
-        alert('⚠️ 请先配置智能表格 Webhook 地址！\n\n在 smartSheetModule.js 中修改 SMART_SHEET_WEBHOOK_URL_DASHBOARD 变量。');
-        return;
-    }
+    console.log('✅ submitDashboardToSmartSheet 被调用了！');
     
     const records = generateDashboardSmartSheetRecords();
+    console.log('📊 看板记录数:', records.length);
     
     if (records.length === 0) {
         alert('⚠️ 没有可提交的数据！');
@@ -648,17 +689,20 @@ async function submitDashboardToSmartSheet() {
     if (!confirm(`即将提交 ${records.length} 条记录到智能表格，确认提交吗？`)) return;
     
     const submitBtn = document.getElementById('submitDashboardToSheetBtn');
-    const originalText = submitBtn.innerText;
-    submitBtn.innerText = '⏳ 提交中...';
-    submitBtn.disabled = true;
+    if (submitBtn) {
+        submitBtn.innerText = '⏳ 提交中...';
+        submitBtn.disabled = true;
+    }
     
     const result = await batchSubmitToSmartSheet(records);
     
-    submitBtn.innerText = originalText;
-    submitBtn.disabled = false;
+    if (submitBtn) {
+        submitBtn.innerText = '📤 提交到智能表格';
+        submitBtn.disabled = false;
+    }
     
     if (result.fail === 0) {
-        alert(`✅ 全部提交成功！共 ${result.success} 条记录已写入智能表格。`);
+        alert(`✅ 全部提交成功！共 ${result.success} 条记录已写入看板表格。`);
     } else {
         alert(`⚠️ 提交完成：成功 ${result.success} 条，失败 ${result.fail} 条。\n请检查网络或联系管理员。`);
     }
@@ -721,11 +765,28 @@ function deleteDashboardTask(idx) {
 
 // ========== 议题二：组织人才操作 ==========
 function addOrgCategory() {
-    const newCategory = prompt('请输入新分类名称（如：招聘工作、文化建设等）', '新分类');
+    const categoryOptions = ['招聘工作', '离职情况', '培训培养', '述职提醒', '能力建设', '文化建设'];
+    const newCategory = prompt('请输入分类名称（建议选择）：\n' + categoryOptions.join('\n'), '招聘工作');
     if (newCategory) {
+        let headers = [];
+        if (newCategory === '招聘工作') {
+            headers = ['团队', '考勤/非考勤编制需求', '已入职', '待入职(日期)', '面试中', '卡点说明'];
+        } else if (newCategory === '离职情况') {
+            headers = ['团队', '离职人数', '姓名', '离职原因', '是否B+及以上', '改进措施'];
+        } else if (newCategory === '培训培养') {
+            headers = ['团队', '培训次数', '培训类型', '培训主题', '参训人数'];
+        } else if (newCategory === '述职提醒') {
+            headers = ['团队', '转正人数', '姓名', '转正日期', '计划述职日期'];
+        } else if (newCategory === '能力建设') {
+            headers = ['技术/事项', '进展状态', '说明', '负责人'];
+        } else {
+            headers = ['传达主题', '精神/要点内容', '传达人', '传达日期'];
+        }
+        const newRow = {};
+        headers.forEach(h => { newRow[h] = ''; });
         dashboardData.org_dynamic.push({
             category: newCategory,
-            rows: [{ 示例字段: '请输入内容' }]
+            rows: [newRow]
         });
         renderDashboard();
     }
@@ -760,9 +821,7 @@ function deleteOrgRow(catIdx, rowIdx) {
 function addComplianceItem() {
     dashboardData.compliance.push({
         事项: '新事项',
-        当前状态: '进行中',
-        本周进展: '',
-        下一步计划: '',
+        计划说明: '',
         负责人: '',
         完成时间: ''
     });
@@ -778,11 +837,12 @@ function deleteComplianceItem(idx) {
 
 // ========== 议题四：具体业务操作 ==========
 function addBizCategory() {
-    const newCategory = prompt('请输入分类名称（已有项目评审/项目完结总结/新项目分析与立项）', '已有项目评审');
+    const categoryOptions = ['已有项目评审', '项目完结总结', '新项目分析与立项'];
+    const newCategory = prompt('请输入分类名称（建议选择）：\n' + categoryOptions.join('\n'), '已有项目评审');
     if (newCategory) {
         let headers = [];
         if (newCategory === '已有项目评审') {
-            headers = ['项目名称', '阶段', '进度', '本周进展', '风险问题', '风险等级', '人力饱和度', '负责人'];
+            headers = ['项目名称', '阶段', '进度%', '本周进展', '风险/问题', '风险等级'];
         } else if (newCategory === '项目完结总结') {
             headers = ['项目名称', '复盘结论', '资源释放情况', '经验教训'];
         } else {

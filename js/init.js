@@ -45,3 +45,9 @@ window.addDecisionItem = addDecisionItem;
 window.deleteDecisionItem = deleteDecisionItem;
 window.addOtherItem = addOtherItem;
 window.deleteOtherItem = deleteOtherItem;
+
+// 导入相关函数
+window.showImportDialog = showImportDialog;
+window.closeImportDialog = closeImportDialog;
+window.doImport = doImport;
+window.parseSmartSheetData = parseSmartSheetData;
